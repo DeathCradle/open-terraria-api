@@ -109,12 +109,18 @@ namespace OTAPI
                 };
                 BossBag?.Invoke(null, args);
                 if (args.Result == HookResult.Cancel)
-                    return -1;
+                {
+#if TerrariaServer_EntitySourcesActive || Terraria_EntitySourcesActive || tModLoader_EntitySourcesActive
+                    return Terraria.Item.NewItem(Source, args.X, args.Y, args.Width, args.Height, args.Type, args.Stack, args.NoBroadcast, args.Pfix, args.NoGrabDelay, args.ReverseLookup);
+#else
+                    return Terraria.Item.NewItem(args.X, args.Y, args.Width, args.Height, args.Type, args.Stack, args.NoBroadcast, args.Pfix, args.NoGrabDelay, args.ReverseLookup);
+#endif
+                }
 
 #if TerrariaServer_EntitySourcesActive || Terraria_EntitySourcesActive || tModLoader_EntitySourcesActive
-                return Terraria.Item.NewItem(Source, args.X, args.Y, args.Width, args.Height, args.Type, args.Stack, args.NoBroadcast, args.Pfix, args.NoGrabDelay, args.ReverseLookup);
+                return Terraria.Item.NewItem(Source, X, Y, Width, Height, Type, Stack, noBroadcast, pfix, noGrabDelay, reverseLookup);
 #else
-                return Terraria.Item.NewItem(args.X, args.Y, args.Width, args.Height, args.Type, args.Stack, args.NoBroadcast, args.Pfix, args.NoGrabDelay, args.ReverseLookup);
+                return Terraria.Item.NewItem(X, Y, Width, Height, Type, Stack, NoBroadcast, Pfix, NoGrabDelay, ReverseLookup);
 #endif
             }
         }
