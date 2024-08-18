@@ -49,10 +49,10 @@ public static class InstallTargetExtensions
 
         File.WriteAllText(Path.Combine(otapiFolder, "Terraria.runtimeconfig.json"), @"{
   ""runtimeOptions"": {
-    ""tfm"": ""net6.0"",
+    ""tfm"": ""net8.0"",
     ""framework"": {
       ""name"": ""Microsoft.NETCore.App"",
-      ""version"": ""5.0.0""
+      ""version"": ""8.0.0""
     }
   }
 }");
