@@ -52,7 +52,7 @@ public class NugetPackageBuilder
         var commitSha = Common.GetGitCommitSha();
         nuspec_xml = nuspec_xml.Replace("[INJECT_GIT_HASH]", String.IsNullOrWhiteSpace(commitSha) ? "" : $" git#{commitSha}");
 
-        var platforms = new[] { "net6.0" }; // relinker only does net6 currently. until there is a reason to implement it...
+        var platforms = new[] { "net8.0" }; // relinker only does net6 currently. until there is a reason to implement it...
         var steamworks = modder.Module.AssemblyReferences.First(x => x.Name == "Steamworks.NET");
         var newtonsoft = modder.Module.AssemblyReferences.First(x => x.Name == "Newtonsoft.Json");
         var dependencies = new[]
