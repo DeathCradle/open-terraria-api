@@ -1,0 +1,12 @@
+{
+  "solution": {
+    "path": "OTAPI.sln",
+    "projects": [
+      "FNA\\FNA.Core.csproj",
+      "OTAPI.Client.Launcher\\OTAPI.Client.Launcher.csproj",
+      "OTAPI.Common\\OTAPI.Common.csproj",
+      "OTAPI.Patcher\\OTAPI.Patcher.csproj",
+      "OTAPI.Scripts\\OTAPI.Scripts.csproj"
+    ]
+  }
+}

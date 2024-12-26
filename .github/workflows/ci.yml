@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
 # Controls when the workflow will run
@@ -16,129 +14,60 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
 
-  PCServer:
+  Server:
     runs-on: ubuntu-latest
-    
+
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [
+          {
+            name: PC,
+            patch_target: p,
+            package_path: OTAPI.PC.nupkg,
+          },
+          {
+            name: Mobile,
+            patch_target: m,
+            package_path: OTAPI.Mobile.nupkg,
+          },
+          {
+            name: tModLoader,
+            patch_target: t,
+            package_path: OTAPI.TML.nupkg,
+          },
+        ]
+
+    name: ${{ matrix.profile.name }} Server
+
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
 
-      - uses: actions/setup-dotnet@v2
+      - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '6.0.x'
 
       - name: Build the project
         run: |
-          dotnet restore OTAPI.Mods.sln
-          dotnet restore OTAPI.Server.Launcher.sln
-          dotnet build OTAPI.Mods.sln
-          cd OTAPI.Patcher/bin/Debug/net6.0
-          dotnet run --project ../../../OTAPI.Patcher.csproj -patchTarget=p -latest=n --framework net6.0
-          cd ../../../../
-          dotnet build OTAPI.Server.Launcher.sln
-          cd OTAPI.Server.Launcher/bin/Debug/net6.0
-          dotnet OTAPI.Server.Launcher.dll -test-init
+          dotnet build OTAPI.Mods.slnf
+          (cd OTAPI.Patcher/bin/Debug/net6.0 && exec dotnet run --project ../../../OTAPI.Patcher.csproj -patchTarget=${{ matrix.profile.patch_target }} -latest=n --framework net6.0)
+          dotnet build OTAPI.Server.Launcher.slnf
+          (cd OTAPI.Server.Launcher/bin/Debug/net6.0 && exec dotnet OTAPI.Server.Launcher.dll -test-init)
 
       - uses: actions/upload-artifact@v3
         with:
-          name: PC NuGet Package
-          path:  OTAPI.Patcher/bin/Debug/net6.0/OTAPI.PC.nupkg
+          name: ${{ matrix.profile.name }} NuGet Package
+          path: OTAPI.Patcher/bin/Debug/net6.0/${{ matrix.profile.package_path }}
 
       - uses: actions/upload-artifact@v3
         with:
-          name: PC Binaries
+          name: ${{ matrix.profile.name }} Binaries
           path: |
-            OTAPI.Patcher/bin/Debug/net6.0/artifact-pc/COPYING.txt
-            OTAPI.Patcher/bin/Debug/net6.0/artifact-pc/OTAPI.dll
-            OTAPI.Patcher/bin/Debug/net6.0/artifact-pc/OTAPI.Runtime.dll
+            OTAPI.Patcher/bin/Debug/net6.0/artifact-*/*
 
       - uses: actions/upload-artifact@v3
         with:
-          name: PC Wiki MD files
-          path: OTAPI.Patcher/bin/Debug/net6.0/OTAPI.PC.Server.mfw.md
-
-  MobileServer:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: 'recursive'
-
-      - uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: '6.0.x'
-
-      - name: Build the project
-        run: |
-          dotnet restore OTAPI.Mods.sln
-          dotnet restore OTAPI.Server.Launcher.sln
-          dotnet build OTAPI.Mods.sln
-          cd OTAPI.Patcher/bin/Debug/net6.0
-          dotnet run --project ../../../OTAPI.Patcher.csproj -patchTarget=m -latest=n --framework net6.0
-          cd ../../../../
-          dotnet build OTAPI.Server.Launcher.sln
-          cd OTAPI.Server.Launcher/bin/Debug/net6.0
-          dotnet OTAPI.Server.Launcher.dll -test-init
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Mobile NuGet Package
-          path: OTAPI.Patcher/bin/Debug/net6.0/OTAPI.Mobile.nupkg
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Mobile Binaries
-          path: |
-            OTAPI.Patcher/bin/Debug/net6.0/artifact-mobile/COPYING.txt
-            OTAPI.Patcher/bin/Debug/net6.0/artifact-mobile/OTAPI.dll
-            OTAPI.Patcher/bin/Debug/net6.0/artifact-mobile/OTAPI.Runtime.dll
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Mobile Wiki MD files
-          path: OTAPI.Patcher/bin/Debug/net6.0/OTAPI.Mobile.Server.mfw.md
-
-  tModLoaderServer:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: 'recursive'
-
-      - uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: '6.0.x'
-
-      - name: Build the project
-        run: |
-          dotnet restore OTAPI.Mods.sln
-          dotnet restore OTAPI.Server.Launcher.sln
-          dotnet build OTAPI.Mods.sln
-          cd OTAPI.Patcher/bin/Debug/net6.0
-          dotnet run --project ../../../OTAPI.Patcher.csproj -patchTarget=t -latest=n --framework net6.0
-          cd ../../../../
-          dotnet build OTAPI.Server.Launcher.sln
-          cd OTAPI.Server.Launcher/bin/Debug/net6.0
-          dotnet OTAPI.Server.Launcher.dll -test-init
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: tModLoader NuGet Package
-          path: OTAPI.Patcher/bin/Debug/net6.0/OTAPI.TML.nupkg
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: tModLoader Binaries
-          path: |
-            OTAPI.Patcher/bin/Debug/net6.0/artifact-tml/COPYING.txt
-            OTAPI.Patcher/bin/Debug/net6.0/artifact-tml/OTAPI.dll
-            OTAPI.Patcher/bin/Debug/net6.0/artifact-tml/OTAPI.Runtime.dll
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: tModLoader Wiki MD files
-          path: OTAPI.Patcher/bin/Debug/net6.0/OTAPI.TML.PC.Server.mfw.md
-            
+          name: ${{ matrix.profile.name }} Wiki MD files
+          path: OTAPI.Patcher/bin/Debug/net6.0/*.mfw.md

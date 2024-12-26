@@ -2,7 +2,6 @@
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net6.0</TargetFramework>
-		<Platforms>x64</Platforms>
 		<Nullable>enable</Nullable>
 		<DebugType>embedded</DebugType>
 		<RunPostBuildEvent>Always</RunPostBuildEvent>

@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "OTAPI.sln",
+    "projects": [
+      "OTAPI.Server.Launcher\\OTAPI.Server.Launcher.csproj",
+      "examples\\RuntimeExample.Server\\RuntimeExample.Server.csproj"
+    ]
+  }
+}
