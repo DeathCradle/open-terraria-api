@@ -49,7 +49,7 @@ public static class InstallTargetExtensions
 
         File.WriteAllText(Path.Combine(otapiFolder, "Terraria.runtimeconfig.json"), @"{
   ""runtimeOptions"": {
-    ""tfm"": ""net6.0"",
+    ""tfm"": ""net9.0"",
     ""framework"": {
       ""name"": ""Microsoft.NETCore.App"",
       ""version"": ""5.0.0""
@@ -241,8 +241,6 @@ using System.Runtime.Versioning;
         compilation = compilation.AddReferences(MetadataReference.CreateFromFile("ImGui.NET.dll"));
         compilation = compilation.AddReferences(MetadataReference.CreateFromFile("OTAPI.exe"));
         compilation = compilation.AddReferences(MetadataReference.CreateFromFile("OTAPI.Runtime.dll"));
-        //compilation = compilation.AddReferences(MetadataReference.CreateFromFile(Path.Combine(hostDir, @"..\OTAPI.Client.Installer\bin\Debug\net6.0\OTAPI.exe")));
-        //compilation = compilation.AddReferences(MetadataReference.CreateFromFile(Path.Combine(hostDir, @"..\OTAPI.Client.Installer\bin\Debug\net6.0\OTAPI.Runtime.dll")));
 
         var outPdbPath = Path.Combine(output, "OTAPI.Client.Installer.pdb");
         var emitOptions = new EmitOptions(
@@ -341,31 +339,6 @@ using System.Runtime.Versioning;
             return Path.GetDirectoryName(files.Single(x => Path.GetFileName(x).Equals("Terraria.exe", StringComparison.CurrentCultureIgnoreCase)));
         else // linux+osx
             return Path.GetDirectoryName(files.Single(x => Path.GetFileName(x).Equals("Terraria", StringComparison.CurrentCultureIgnoreCase)));
-
-        //Console.WriteLine(target.Status = "Building launcher, this may take a long time...");
-        //var hostDir = "../../../../OTAPI.Client.Launcher/";
-
-        //var package = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-        //    ? "win-x64" : (
-        //    RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "osx.10.11-x64" : "ubuntu.16.04-x64"
-        //);
-
-        //using var process = new System.Diagnostics.Process()
-        //{
-        //    StartInfo = new System.Diagnostics.ProcessStartInfo()
-        //    {
-        //        FileName = "dotnet",
-        //        Arguments = $"publish -r {package} --framework net6.0 -p:PublishTrimmed=true -p:PublishSingleFile=true -p:PublishReadyToRun=true --self-contained true -c Release",
-        //        //Arguments = "msbuild -restore -t:PublishAllRids",
-        //        WorkingDirectory = hostDir
-        //    },
-        //};
-        //process.Start();
-        //process.WaitForExit();
-
-        //Console.WriteLine("Published");
-
-        //return Path.Combine(hostDir, "bin", "Release", "net6.0", package, "publish");
     }
 
     public static string DownloadZip(this IPlatformTarget target, string url, string name)
@@ -436,8 +409,8 @@ using System.Runtime.Versioning;
                 if (File.Exists(dll))
                     return Assembly.LoadFile(dll);
 
-                exe = Path.Combine(patcherDir, "bin", "Debug", "net6.0", "EmbeddedResources", $"{asr.Name}.exe");
-                dll = Path.Combine(patcherDir, "bin", "Debug", "net6.0", "EmbeddedResources", $"{asr.Name}.dll");
+                exe = Path.Combine(patcherDir, "bin", "Debug", "net9.0", "EmbeddedResources", $"{asr.Name}.exe");
+                dll = Path.Combine(patcherDir, "bin", "Debug", "net9.0", "EmbeddedResources", $"{asr.Name}.dll");
 
                 if (File.Exists(exe))
                     return Assembly.LoadFile(exe);

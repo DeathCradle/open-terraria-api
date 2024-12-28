@@ -87,7 +87,7 @@ public partial class MainWindow : Window
         Context.Console.Insert(0, $"[{DateTime.Now:yyyyMMdd HH:mm:ss}] {line}");
     }
 
-    protected override void OnClosing(CancelEventArgs e)
+    protected override void OnClosing(WindowClosingEventArgs e)
     {
         base.OnClosing(e);
         _watcher?.Dispose();

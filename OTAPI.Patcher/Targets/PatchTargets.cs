@@ -42,6 +42,9 @@ public static class PatchTargets
         if (!String.IsNullOrWhiteSpace(cli) && _targets.TryGetValue(cli[0], out IPatchTarget? match))
             return match;
 
+        if(Console.IsInputRedirected)
+            return new PCServerTarget();
+
         int attempts = 5;
         do
         {

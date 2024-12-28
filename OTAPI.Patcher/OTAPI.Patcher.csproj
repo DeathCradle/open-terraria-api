@@ -2,22 +2,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net6.0</TargetFramework>
-		<Version>3.1.20</Version>
+		<TargetFramework>net9.0</TargetFramework>
+		<Version>3.1.21</Version>
 		<PreserveCompilationContext>true</PreserveCompilationContext>
-		<PlatformTarget>x64</PlatformTarget>
-		<RuntimeIdentifiers>win7-x64;osx.10.11-x64;ubuntu.16.04-x64</RuntimeIdentifiers>
+		<RuntimeIdentifiers>win;osx;linux;</RuntimeIdentifiers>
 		<Nullable>enable</Nullable>
 		<PackageReleaseNotes>Initial 1.4.4.9 support</PackageReleaseNotes>
 	</PropertyGroup>
 	<ItemGroup>
-    <PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.7" />
-    <PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.7" />
-    <PackageReference Include="ModFramework.Modules.Lua" Version="1.1.7" />
-    <PackageReference Include="MonoMod.RuntimeDetour.HookGen" Version="22.5.1.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Security.Permissions" Version="6.0.0" />
-    <PackageReference Include="Steamworks.NET" Version="20.1.0" />
+		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.9" />
+		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.9" />
+		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.9" />
+		<PackageReference Include="Steamworks.NET" Version="2024.8.0" />
+		<PackageReference Include="MonoMod.RuntimeDetour.HookGen" Version="22.7.31.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="System.Private.Uri" Version="4.3.2" />
+		<PackageReference Include="System.Security.Permissions" Version="9.0.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\FNA\FNA.Core.csproj" />

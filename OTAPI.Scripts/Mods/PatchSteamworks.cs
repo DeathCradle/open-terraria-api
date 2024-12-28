@@ -23,8 +23,8 @@ System.Console.WriteLine("Steamworks.NET patch not available in TML1.4");
 #else
 using ModFramework;
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 using MonoMod;
-using System.IO;
 using System.Linq;
 
 /// <summary>
@@ -32,16 +32,17 @@ using System.Linq;
 /// </summary>
 [Modification(ModType.PreMerge, "Patching Steamworks.NET")]
 [MonoMod.MonoModIgnore]
-void PatchSteam(MonoModder modder)
+void PatchSteam(ModFwModder modder)
 {
-    var desired = typeof(Steamworks.SteamShutdown_t).Assembly.GetName().Version;
+    var steamworks = AssemblyDefinition.ReadAssembly("Steamworks.NET.dll"); // Avoid using type refs, as arm64 will die on this assembly.
+    var version = steamworks.Name.Version; // Avoid using type refs, as arm64 will die on this assembly.
 
     //Update the references to match what is installed
     foreach (var reference in modder.Module.AssemblyReferences)
     {
         if (reference.Name == "Steamworks.NET")
         {
-            reference.Version = desired;
+            reference.Version = version;
             break;
         }
     }
@@ -50,5 +51,35 @@ void PatchSteam(MonoModder modder)
     modder.Module.Resources.Remove(
         modder.Module.Resources.Single(x => x.Name.EndsWith("Steamworks.NET.dll"))
     );
+
+    // Wire in changes since Terraria implemented this library - we are using the latest!
+    var steamNetworkingIdentity = modder.Module.ImportReference(steamworks.MainModule.Types.Single(x => x.FullName == "Steamworks.SteamNetworkingIdentity"));
+    modder.OnRewritingMethodBody += (MonoModder modder, MethodBody body, Instruction instr, int instri) =>
+    {
+        if (instr.OpCode == OpCodes.Call && instr.Operand is MethodReference methodRef)
+        {
+            if (methodRef.DeclaringType.FullName == "Steamworks.SteamUGC" &&
+                methodRef.Name == "SetItemTags" &&
+                instr.Previous.OpCode != OpCodes.Ldc_I4_0)
+            {
+                // add bAllowAdminTags = false to the call
+                body.Instructions.Insert(instri, Instruction.Create(OpCodes.Ldc_I4_0));
+                methodRef.Parameters.Add(new("bAllowAdminTags", ParameterAttributes.None, methodRef.Module.TypeSystem.Boolean));
+            }
+
+            if (methodRef.DeclaringType.FullName == "Steamworks.SteamUser" &&
+                methodRef.Name == "GetAuthSessionTicket" &&
+                instr.Previous.OpCode != OpCodes.Ldloca_S)
+            {
+                // create a new local variable to store SteamNetworkingIdentity 
+                var steamNetworkingIdentityVar = new VariableDefinition(steamNetworkingIdentity);
+                body.Variables.Add(steamNetworkingIdentityVar);
+                body.InitLocals = true;
+                body.Instructions.Insert(instri, Instruction.Create(OpCodes.Ldloca_S, steamNetworkingIdentityVar));
+                // add parameter: ref SteamNetworkingIdentity pSteamNetworkingIdentity
+                methodRef.Parameters.Add(new("pSteamNetworkingIdentity", ParameterAttributes.None, new ByReferenceType(steamNetworkingIdentity)));
+            }
+        }
+    };
 }
 #endif

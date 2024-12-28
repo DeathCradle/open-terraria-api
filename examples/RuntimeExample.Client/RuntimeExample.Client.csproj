@@ -18,10 +18,10 @@
       <HintPath>..\..\OTAPI.Client.Installer\bin\Debug\net472\OTAPI.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="OTAPI">
-      <HintPath>..\..\OTAPI.Patcher\bin\Debug\net6.0\OTAPI.exe</HintPath>
+      <HintPath>..\..\OTAPI.Patcher\bin\Debug\net9.0\OTAPI.exe</HintPath>
     </Reference>
     <Reference Include="FNA">
-      <HintPath>..\..\OTAPI.Patcher\bin\Debug\net6.0\FNA.dll</HintPath>
+      <HintPath>..\..\OTAPI.Patcher\bin\Debug\net9.0\FNA.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -8,9 +8,12 @@
     <Application.Resources>
         <themes:BundledTheme BaseTheme="Light" PrimaryColor="Teal" SecondaryColor="Amber"/>
     </Application.Resources>
-    <Application.Styles>
+    <!--<Application.Styles>
         <StyleInclude Source="avares://Avalonia.Themes.Default/DefaultTheme.xaml"/>
         <StyleInclude Source="avares://Avalonia.Themes.Default/Accents/BaseLight.xaml"/>
         <StyleInclude Source="avares://Material.Avalonia/Material.Avalonia.Templates.xaml" />
-    </Application.Styles>
+    </Application.Styles>-->
+	<Application.Styles>
+		<themes:MaterialTheme BaseTheme="Dark" PrimaryColor="Purple" SecondaryColor="Lime" />
+	</Application.Styles>
 </Application>

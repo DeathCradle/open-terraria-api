@@ -64,10 +64,10 @@ void OnPacketWrite(MonoModder modder)
     sendData.Emit(OpCodes.Ldloc, ms);
     sendData.Emit(OpCodes.Ldloc, bw);
 
-    foreach (var method in sendData.Method.Parameters)
+    foreach (var prm in sendData.Method.Parameters)
     {
-        callback.Parameters.Add(method.Clone());
-        sendData.Emit(OpCodes.Ldarg, method);
+        callback.Parameters.Add(prm.Clone());
+        sendData.Emit(OpCodes.Ldarg, prm);
     }
 
     sendData.Emit(OpCodes.Call, callback);

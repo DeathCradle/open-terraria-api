@@ -170,6 +170,7 @@ class Program
             plg.OnEnabledChanged += OnPluginChanged;
 
         // start the launcher, then OTAPI if requested
+        IconProvider.Current.Register(new FontAwesomeIconProvider());
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
 
@@ -189,7 +190,5 @@ class Program
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
-            .LogToTrace()
-            .WithIcons(container => container
-                .Register<FontAwesomeIconProvider>());
+            .LogToTrace();
 }

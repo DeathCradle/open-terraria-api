@@ -8,7 +8,7 @@ The [upcoming branch](https://github.com/SignatureBeef/Open-Terraria-API/tree/up
 Significant changes this redesign brings are...
 * Modular script system, allowing single file patches using [csharp](https://www.nuget.org/packages/ModFramework.Modules.CSharp/), [javascript](https://www.nuget.org/packages/ModFramework.Modules.ClearScript/) and [lua](https://www.nuget.org/packages/ModFramework.Modules.Lua/)
 * A strong set of libraries with methods and extensions for use in extending or contributing back
-* .NET6 projects for all without Terraria's dependency to net4.
+* .NET9 projects for all without Terraria's dependency to net4.
 
 The stack consists upon:
 * [OTAPI Scripts](https://github.com/SignatureBeef/Open-Terraria-API/tree/upcoming/OTAPI.Scripts), a directory containing all the scripts used to patch the pc, mobile & client assemblies.
