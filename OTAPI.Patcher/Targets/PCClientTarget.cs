@@ -214,31 +214,23 @@ public class PCClientTarget : IClientPatchTarget
                         mm.ReadMod(typeof(HookEvent).Assembly.Location);
                         mm.ReadMod(Path.Combine(embeddedResourcesPath, "ReLogic.dll"));
                         mm.ReadMod(Path.Combine(embeddedResourcesPath, "RailSDK.Net.dll"));
-                    //}
-                    //else if (modType == ModType.PostMapDependencies)
-                    //{
+
                         foreach (var path in shims)
                         {
                             SetStatus($"Reading: {Path.GetFileNameWithoutExtension(path)}");
                             mm.ReadMod(path);
                         }
-                        //mm.ReadMod("Microsoft.Win32.Registry.dll");
 
                         // relink / merge into the output
                         mm.RelinkAssembly("ReLogic");
                         mm.RelinkAssembly("RailSDK.Net");
                         mm.RelinkAssembly("System.Windows.Forms");
-
-                        //var reg = ModuleDefinition.ReadModule("Microsoft.Win32.Registry.dll");
-                        //mm.RelinkAssembly("Microsoft.Win32.Registry", reg);
                     }
                 }
                 return EApplyResult.Continue;
             }, (mm, str) => SetStatus(str));
 
             ModContext.ReferenceFiles.Add(refs);
-
-            //var knownFiles = Directory.GetFiles(Environment.CurrentDirectory, "*.dll");
 
             var asm = Assembly.LoadFile(refs);
             var cache = new Dictionary<string, Assembly>();
@@ -255,11 +247,7 @@ public class PCClientTarget : IClientPatchTarget
                 }
 
                 var dll = $"{args.Name}.dll";
-                //var dll = knownFiles.FirstOrDefault(f => Path.GetFileNameWithoutExtension(f).Replace(".", "")
-                //    .Equals(args.Name.Replace(".", ""), StringComparison.CurrentCultureIgnoreCase)
-                //);
-
-                if (dll is not null && File.Exists(dll))
+                if (File.Exists(dll))
                 {
                     asmm = Assembly.Load(File.ReadAllBytes(dll));
                     cache[args.Name] = asmm;
@@ -340,6 +328,7 @@ public class PCClientTarget : IClientPatchTarget
 
         ModContext.TargetAssemblyName = "OTAPI"; // change the target assembly since otapi is now valid for write events
 
+        if (Hooks.Loader is null) throw new Exception("Hooks.Loader is null");
         Hooks.Loader.LoadModifications("modules-patched", CSharpLoader.EModification.Module);
     }
 
@@ -408,7 +397,8 @@ public class PCClientTarget : IClientPatchTarget
 
     public virtual string GetEmbeddedResourcesDirectory(string fileinput)
     {
-        return Path.Combine(ModContext.BaseDirectory, Path.GetDirectoryName(fileinput));
+        var name = Path.GetDirectoryName(fileinput) ?? throw new Exception($"Unable to determine directory name for input: {fileinput}");
+        return Path.Combine(ModContext.BaseDirectory, name);
     }
     public virtual void AddSearchDirectories(ModFwModder modder) { }
 

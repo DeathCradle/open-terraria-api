@@ -116,22 +116,20 @@ class Program
         Start(args);
     }
 
-    public static IEnumerable<string> DiscoverFilesInFolder(string folder, string pattern, SearchOption searchOption = SearchOption.AllDirectories)
+    public static string[] DiscoverFilesInFolder(string folder, string pattern, SearchOption searchOption = SearchOption.AllDirectories)
     {
         if (Directory.Exists(folder))
             return Directory.GetFiles(folder, pattern, searchOption);
-
-        return Enumerable.Empty<string>();
+        return [];
     }
 
-    public static IEnumerable<string> DiscoverFoldersInFolder(string folder, string? pattern = null, SearchOption searchOption = SearchOption.AllDirectories)
+    public static string[] DiscoverFoldersInFolder(string folder, string? pattern = null, SearchOption searchOption = SearchOption.AllDirectories)
     {
         if (Directory.Exists(folder))
             return pattern is not null ?
                 Directory.GetDirectories(folder, pattern, searchOption)
                 : Directory.GetDirectories(folder);
-
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     public static string[] DiscoverPlugins()
