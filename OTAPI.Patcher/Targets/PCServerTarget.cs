@@ -210,6 +210,7 @@ public class PCServerTarget : IServerPatchTarget
                             mm.Module.GetType("Terraria.NPC").CreateHooks(mm);
                             mm.Module.GetType("Terraria.WorldGen").CreateHooks(mm);
                             mm.Module.GetType("Terraria.Chat.ChatHelper").CreateHooks(mm);
+                            mm.Module.GetType("Terraria.GameContent.ItemDropRules.CommonCode").CreateHooks(mm);
                             mm.Module.GetType("Terraria.IO.WorldFile").CreateHooks(mm);
                             mm.Module.GetType("Terraria.Net.NetManager").CreateHooks(mm);
                             mm.Module.GetType("Terraria.Projectile").CreateHooks(mm);
