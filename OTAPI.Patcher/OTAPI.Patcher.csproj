@@ -10,9 +10,9 @@
 		<PackageReleaseNotes>Initial 1.4.4.9 support</PackageReleaseNotes>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.9" />
-		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.9" />
-		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.9" />
+		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.11" />
+		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.11" />
+		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.11" />
 		<PackageReference Include="Steamworks.NET" Version="2024.8.0" />
 		<PackageReference Include="MonoMod.RuntimeDetour.HookGen" Version="22.7.31.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

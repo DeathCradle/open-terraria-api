@@ -18,13 +18,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 using OTAPI.Common;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OTAPI.Client.Launcher.Targets;
 
 public interface IPlatformTarget : IInstallDiscoverer
 {
-    void Install(string installPath);
-    bool IsValidInstallPath(string installPath);
+    Task InstallAsync(string installPath, CancellationToken cancellationToken);
+    //bool IsValidInstallPath(string installPath);
     event EventHandler<InstallStatusUpdate> StatusUpdate;
     string Status { set; }
 

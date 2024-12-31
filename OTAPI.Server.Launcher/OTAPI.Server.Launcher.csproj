@@ -12,12 +12,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ModFramework" Version="1.1.9">
+		<PackageReference Include="ModFramework" Version="1.1.11">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</PackageReference>
-		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.9" />
-		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.9" />
-		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.9" />
+		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.11" />
+		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.11" />
+		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.11" />
 		<PackageReference Include="Steamworks.NET" Version="2024.8.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
@@ -25,7 +25,7 @@
 		<PackageReference Include="System.IO.Packaging" Version="9.0.0" />
 		<PackageReference Include="System.Security.Permissions" Version="9.0.0" />
 		<PackageReference Include="Mono.Cecil" Version="0.11.6" />
-		<PackageReference Include="MonoMod.RuntimeDetour.HookGen" Version="22.7.31.1" />
+		<!--<PackageReference Include="MonoMod.RuntimeDetour.HookGen" Version="22.7.31.1" />-->
 		<PackageReference Include="MonoMod" Version="22.7.31.1">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</PackageReference>

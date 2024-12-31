@@ -114,7 +114,6 @@ static class OTAPI
 
         GC.Collect();
 
-
         CSharpLoader.OnCompilationContext += CSharpLoader_OnCompilationContext;
 
         AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
@@ -232,7 +231,7 @@ static class OTAPI
                 using var stream = root.GetManifestResourceStream(text);
                 if (stream is null) return null;
                 byte[] array = new byte[stream.Length];
-                stream.Read(array, 0, array.Length);
+                stream.ReadExactly(array);
                 stream.Seek(0, SeekOrigin.Begin);
 
                 // if (!File.Exists(resourceName))
@@ -267,10 +266,10 @@ static class OTAPI
         IEnumerable<string> matches = Enumerable.Empty<string>();
 
         foreach (var basePath in new[] {
-                Environment.CurrentDirectory,
-                AppContext.BaseDirectory,
-                Path.Combine(Environment.CurrentDirectory, "client")
-            })
+            Environment.CurrentDirectory,
+            AppContext.BaseDirectory,
+            Path.Combine(Environment.CurrentDirectory, "client")
+        })
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {

@@ -31,9 +31,10 @@ public static partial class Common
 {
     public static string GetVersion()
     {
-        return typeof(Common).Assembly
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-            .InformationalVersion;
+        var attr = typeof(Common).Assembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>() ??
+            throw new Exception("Unable to get version attribute");
+        return attr.InformationalVersion;
     }
 
     public static void Log(string message)
@@ -41,14 +42,14 @@ public static partial class Common
         Console.WriteLine($"[ModFw] {message}");
     }
 
-    public static string GetCliValue(string key)
+    public static string? GetCliValue(string key)
     {
         string find = $"-{key}=";
         var match = Array.Find(Environment.GetCommandLineArgs(), x => x.StartsWith(find, StringComparison.CurrentCultureIgnoreCase));
         return match?.Substring(find.Length)?.ToLower();
     }
 
-    public static string GetGitCommitSha()
+    public static string? GetGitCommitSha()
     {
         var commitSha = Environment.GetEnvironmentVariable("GITHUB_SHA")?.Trim();
         if (commitSha != null && commitSha.Length >= 7)
@@ -107,6 +108,7 @@ public static partial class Common
         {
             if (header) return HeaderFormat;
 
+            if (data?.FilePath is null) throw new Exception("Unable to determine ");
             var filename = Path.GetFileName(data.FilePath);
             var client = data.FilePath.Contains("patchtime", StringComparison.CurrentCultureIgnoreCase);
 

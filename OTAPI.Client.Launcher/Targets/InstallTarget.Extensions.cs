@@ -34,12 +34,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OTAPI.Client.Launcher.Targets;
 
 public static class InstallTargetExtensions
 {
-    public static void CopyOTAPI(this IPlatformTarget target, string otapiFolder, IEnumerable<string> packagePaths)
+    public static void CopyOTAPI(this IPlatformTarget target, string otapiFolder, IReadOnlyCollection<string> packagePaths)
     {
         Console.WriteLine(target.Status = "Copying OTAPI...");
         foreach (var packagePath in packagePaths)
@@ -52,7 +54,7 @@ public static class InstallTargetExtensions
     ""tfm"": ""net9.0"",
     ""framework"": {
       ""name"": ""Microsoft.NETCore.App"",
-      ""version"": ""5.0.0""
+      ""version"": ""9.0.0""
     }
   }
 }");
@@ -158,7 +160,7 @@ public static class InstallTargetExtensions
         }
     }
 
-    public static IEnumerable<string> PublishHostGame(this IPlatformTarget target)
+    public static string PublishHostGame(this IPlatformTarget target)
     {
         Console.WriteLine(target.Status = "Building host game...");
 
@@ -177,25 +179,22 @@ public static class InstallTargetExtensions
             .WithAllowUnsafe(true);
 
         var files = Directory.EnumerateFiles(hostDir, "*.cs");
-        var parsed = CSharpLoader.ParseFiles(files, constants);
+        var parsed = CSharpLoader.ParseFiles(files, constants).ToList();
 
-        {
-            //var folder = Path.GetFileName(Path.GetDirectoryName(file));
+        var encoding = System.Text.Encoding.UTF8;
+        var parse_options = CSharpParseOptions.Default
+            .WithKind(SourceCodeKind.Regular)
+            .WithPreprocessorSymbols(constants.Select(s => s.Replace("#define ", "")))
+            .WithDocumentationMode(DocumentationMode.Parse)
+            .WithLanguageVersion(LanguageVersion.Preview); // allows toplevel functions
 
-            var encoding = System.Text.Encoding.UTF8;
-            var parse_options = CSharpParseOptions.Default
-                .WithKind(SourceCodeKind.Regular)
-                .WithPreprocessorSymbols(constants.Select(s => s.Replace("#define ", "")))
-                .WithDocumentationMode(DocumentationMode.Parse)
-                .WithLanguageVersion(LanguageVersion.Preview); // allows toplevel functions
-
-            var src = @"
+        var src = @"
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 
-[assembly: TargetFramework("".NETCoreApp,Version=v5.0"", FrameworkDisplayName = """")]
+[assembly: TargetFramework("".NETCoreApp,Version=v9.0"", FrameworkDisplayName = """")]
 [assembly: AssemblyCompany(""OTAPI.Client.Installer"")]
 [assembly: AssemblyFileVersion(""1.0.0.0"")]
 [assembly: AssemblyInformationalVersion(""1.0.0"")]
@@ -203,24 +202,24 @@ using System.Runtime.Versioning;
 [assembly: AssemblyTitle(""OTAPI.Client.Installer"")]
 [assembly: AssemblyVersion(""1.0.0.0"")]
 ";
-            var source = SourceText.From(src, encoding);
-            var encoded = CSharpSyntaxTree.ParseText(source, parse_options);
+        var source = SourceText.From(src, encoding);
+        var encoded = CSharpSyntaxTree.ParseText(source, parse_options);
 
-            parsed = parsed.Concat(new[]{
-                    new CSharpLoader.CompilationFile()
-                    {
-                        SyntaxTree = encoded,
-                    }
-                 });
-        }
+        parsed.Add(new()
+        {
+            SyntaxTree = encoded,
+        });
 
-        var syntaxTrees = parsed.Select(x => x.SyntaxTree);
+        var syntaxTrees = parsed
+            .Where(x => x.SyntaxTree is not null)
+            .Select(x => x.SyntaxTree!)
+            .ToArray();
 
         var compilation = CSharpCompilation
             .Create("OTAPI.Client.Installer", syntaxTrees, options: compile_options)
         ;
 
-        var libs = ((String)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))
+        var libs = (AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES") as string ?? throw new Exception("No trusted assemblies found"))
             .Split(Path.PathSeparator)
             .Where(x => !x.StartsWith(Environment.CurrentDirectory));
         foreach (var lib in libs)
@@ -229,12 +228,12 @@ using System.Runtime.Versioning;
         }
 
 #if RELEASE
-            foreach (var lib in System.IO.Directory.GetFiles(Environment.CurrentDirectory, "System.*.dll"))
-            {
-                compilation = compilation.AddReferences(MetadataReference.CreateFromFile(lib));
-            }
-            compilation = compilation.AddReferences(MetadataReference.CreateFromFile("mscorlib.dll"));
-            compilation = compilation.AddReferences(MetadataReference.CreateFromFile("netstandard.dll"));
+        foreach (var lib in System.IO.Directory.GetFiles(Environment.CurrentDirectory, "System.*.dll"))
+        {
+            compilation = compilation.AddReferences(MetadataReference.CreateFromFile(lib));
+        }
+        compilation = compilation.AddReferences(MetadataReference.CreateFromFile("mscorlib.dll"));
+        compilation = compilation.AddReferences(MetadataReference.CreateFromFile("netstandard.dll"));
 #endif
 
         compilation = compilation.AddReferences(MetadataReference.CreateFromFile("FNA.dll"));
@@ -249,9 +248,9 @@ using System.Runtime.Versioning;
         );
 
 
-        var dllStream = new MemoryStream();
-        var pdbStream = new MemoryStream();
-        var xmlStream = new MemoryStream();
+        MemoryStream dllStream = new();
+        MemoryStream pdbStream = new();
+        MemoryStream xmlStream = new();
         var result = compilation.Emit(
             peStream: dllStream,
             pdbStream: pdbStream,
@@ -271,34 +270,34 @@ using System.Runtime.Versioning;
 
         Console.WriteLine("Published");
 
-        return new[] { output };
+        return output;
     }
 
     class GHRelease
     {
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonProperty("assets")]
-        public IEnumerable<GHArtifact> Assets { get; set; }
+        public GHArtifact[]? Assets { get; set; }
     }
     class GHArtifact
     {
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonProperty("browser_download_url")]
-        public string BrowserDownloadUrl { get; set; }
+        public string? BrowserDownloadUrl { get; set; }
     }
 
     public static string PublishHostLauncher(this IPlatformTarget target)
     {
         var url = "https://api.github.com/repos/DeathCradle/Open-Terraria-API/releases";
 
-        using var client = new HttpClient();
+        using HttpClient client = new();
         client.DefaultRequestHeaders.UserAgent.ParseAdd("OTAPI3-Installer");
         var data = client.GetStringAsync(url).Result;
-        var releases = Newtonsoft.Json.JsonConvert.DeserializeObject<GHRelease[]>(data);
+        var releases = Newtonsoft.Json.JsonConvert.DeserializeObject<GHRelease[]>(data) ?? throw new Exception("Unable to read release data");
 
         GHRelease release;
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -308,7 +307,8 @@ using System.Runtime.Versioning;
         else // linux
             release = releases.First(a => a.Name == "Linux Launcher");
 
-        url = release.Assets.First(a => a.Name.EndsWith(".zip", StringComparison.CurrentCultureIgnoreCase)).BrowserDownloadUrl;
+        url = release?.Assets?.First(a => a.Name?.EndsWith(".zip", StringComparison.CurrentCultureIgnoreCase) == true).BrowserDownloadUrl
+            ?? throw new Exception("Failed to find zip file in installer release");
 
         Console.WriteLine(target.Status = "Downloading launcher, this may take a long time...");
         using var launcher = client.GetStreamAsync(url).Result;
@@ -329,19 +329,19 @@ using System.Runtime.Versioning;
             fs.Close();
         }
 
-        if (Directory.Exists("launcher_files")) Directory.Delete("launcher_files", true);
-        Directory.CreateDirectory("launcher_files");
+        var directory = "launcher_files";
+        if (Directory.Exists(directory)) Directory.Delete(directory, true);
+        Directory.CreateDirectory(directory);
         ZipFile.ExtractToDirectory("launcher.zip", "launcher_files");
 
-        var files = Directory.GetFiles("launcher_files", "*", SearchOption.AllDirectories);
+        var files = Directory.GetFiles(directory, "*", SearchOption.AllDirectories);
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            return Path.GetDirectoryName(files.Single(x => Path.GetFileName(x).Equals("Terraria.exe", StringComparison.CurrentCultureIgnoreCase)));
-        else // linux+osx
-            return Path.GetDirectoryName(files.Single(x => Path.GetFileName(x).Equals("Terraria", StringComparison.CurrentCultureIgnoreCase)));
+        var exeName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "Terraria.exe" : "Terraria";
+        var location = files.Single(x => Path.GetFileName(x).Equals(exeName, StringComparison.CurrentCultureIgnoreCase));
+        return Path.GetDirectoryName(location) ?? throw new Exception($"Failed to find {exeName} in {directory}");
     }
 
-    public static string DownloadZip(this IPlatformTarget target, string url, string name)
+    public async static Task<string> DownloadZipAsync(this IPlatformTarget target, string url, string name, CancellationToken cancellationToken)
     {
         Console.WriteLine($"Downloading {url}");
         var uri = new Uri(url);
@@ -355,18 +355,28 @@ using System.Runtime.Versioning;
 
             if (!info.Exists || info.Length == 0)
             {
-                using (var wc = new System.Net.WebClient())
+                using var destination = File.OpenWrite(savePath);
+                using HttpClient http = new();
+                using var response = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+                var contentLength = response.Content.Headers.ContentLength;
+
+                using var download = await response.Content.ReadAsStreamAsync(cancellationToken);
+
+                if (!contentLength.HasValue)
+                    await download.CopyToAsync(destination);
+                else
                 {
-                    int lastPercentage = -1;
-                    wc.DownloadProgressChanged += (s, e) =>
+                    // download in chunks
+                    var buffer = new byte[65535];
+                    var read = 0;
+                    var totalRead = 0;
+                    while ((read = await download.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
                     {
-                        if (lastPercentage != e.ProgressPercentage && e.ProgressPercentage % 10 == 0)
-                        {
-                            lastPercentage = e.ProgressPercentage;
-                            Console.WriteLine($"Downloading {name}...{e.ProgressPercentage}%");
-                        }
-                    };
-                    wc.DownloadFileTaskAsync(new Uri(url), savePath).Wait();
+                        await destination.WriteAsync(buffer, 0, read, cancellationToken);
+                        totalRead += read;
+                        Console.WriteLine($"Downloading {name}...{totalRead / contentLength.Value * 100}%");
+                    }
                 }
             }
 
@@ -459,16 +469,15 @@ using System.Runtime.Versioning;
         Utils.CopyFiles("install", otapiInstallPath);
     }
 
-    public static void InstallLibs(this IPlatformTarget target, string installPath)
+    public async static Task InstallLibsAsync(this IPlatformTarget target, string installPath, CancellationToken cancellationToken)
     {
-        //var zipPath = target.DownloadZip("http://fna.flibitijibibo.com/archive/fnalibs.tar.bz2", "fnalibs");
-        var zipPath = target.DownloadZip("https://github.com/DeathCradle/fnalibs/raw/main/fnalibs.20211125.tar.bz2", "fnalibs");
+        var zipPath = await target.DownloadZipAsync("https://github.com/DeathCradle/fnalibs/raw/main/fnalibs.20211125.tar.bz2", "fnalibs", cancellationToken);
         target.ExtractBZip2(zipPath, installPath);
     }
 
-    public static void InstallSteamworks64(this IPlatformTarget target, string installPath, string steam_appid_folder)
+    public async static Task InstallSteamworks64Async(this IPlatformTarget target, string installPath, string steam_appid_folder, CancellationToken cancellationToken)
     {
-        var zipPath = target.DownloadZip("https://github.com/rlabrecque/Steamworks.NET/releases/download/20.1.0/Steamworks.NET-Standalone_20.1.0.zip", "steamworks64");
+        var zipPath = await target.DownloadZipAsync("https://github.com/rlabrecque/Steamworks.NET/releases/download/2024.8.0/Steamworks.NET-Standalone_2024.8.0.zip", "steamworks64", cancellationToken);
         var folderName = Path.GetFileNameWithoutExtension(zipPath);
         if (Directory.Exists(folderName)) Directory.Delete(folderName, true);
         ZipFile.ExtractToDirectory(zipPath, folderName);

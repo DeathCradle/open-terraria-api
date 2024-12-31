@@ -23,7 +23,7 @@
     </Style>
 
     <Style Selector="TextBox.install-path">
-      <Setter Property="FontSize" Value="8" />
+      <Setter Property="FontSize" Value="15" />
       <Setter Property="FontWeight" Value="300" />
     </Style>
     <Style Selector="TextBlock.h1">
