@@ -124,7 +124,7 @@ public static partial class PatchTargetExtensions
 
             GACPaths = new string[] { } // avoid MonoMod looking up the GAC, which causes an exception on .netcore
         };
-        mm.Log($"[OTAPI] Processing corelibs to be net6: {fileName}");
+        mm.Log($"[OTAPI] Processing corelibs to be net9: {fileName}");
 
         mm.Read();
 

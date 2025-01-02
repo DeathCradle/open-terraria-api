@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2020 DeathCradle
+Copyright (C) 2020-2024 SignatureBeef
 
 This file is part of Open Terraria API v3 (OTAPI)
 
@@ -18,6 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 using System;
+using System.Runtime.InteropServices;
 using ModFramework;
 
 namespace RuntimeExample.Server;
@@ -28,19 +29,22 @@ public static class Hooks
     public static void OnRunning()
     {
         Console.WriteLine("[RuntimeExample Server] Hello World! from a compiled DLL");
-        On.Terraria.Program.LaunchGame += Program_LaunchGame;
-        On.Terraria.NetMessage.greetPlayer += NetMessage_greetPlayer;
+
+        if (RuntimeInformation.ProcessArchitecture != Architecture.Arm64)
+            On.Terraria.NetMessage.greetPlayer += MonoMod_greetPlayer;
+        else
+            HookEvents.Terraria.NetMessage.greetPlayer += Modfw_greetPlayer;
     }
 
-    private static void NetMessage_greetPlayer(On.Terraria.NetMessage.orig_greetPlayer orig, int plr)
+    private static void MonoMod_greetPlayer(On.Terraria.NetMessage.orig_greetPlayer orig, int plr)
     {
         Console.WriteLine($"[RuntimeExample Server] Greet player: {plr}");
         orig(plr);
     }
 
-    private static void Program_LaunchGame(On.Terraria.Program.orig_LaunchGame orig, string[] args, bool monoArgs)
+    private static void Modfw_greetPlayer(object sender, HookEvents.Terraria.NetMessage.greetPlayerEventArgs args)
     {
-        Console.WriteLine("[RuntimeExample Server] LaunchGame was called!");
-        orig(args, monoArgs);
+        Console.WriteLine($"[RuntimeExample Server] Greet player: {args.plr}");
+        args.OriginalMethod(args.plr);
     }
 }

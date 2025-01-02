@@ -14,12 +14,12 @@
 
         OTAPI is primarily a server modification and is available as a cross platform package via NuGet.
 
-        Version 3.0 is now a .NET6 library thanks to ModFramework being able to retarget the .NET4 vanilla assembly up to .NET6.
-        This means that any mod you create can be written as a .NET6 module and later merged into the patched assembly thanks to MonoMod.
+        Version 3.0 is now a .NET9 library thanks to ModFramework being able to retarget the .NET4 vanilla assembly up to .NET9.
+        This means that any mod you create can be written as a .NET9 module and later merged into the patched assembly thanks to MonoMod.
 
         Here is what is now possible:
          - Native Runtime hooks, just reference OTAPI.Runtime.dll and register to MonoMod events generated from the Terraria assembly.
-         - Full .NET6 ecosystem and its performance improvements. No need for two targets such as Windows &amp; Mono anymore either.
+         - Full .NET9 ecosystem and its performance improvements. No need for two targets such as Windows &amp; Mono anymore either.
          - A new optional internal module system via ModFramework to load precompiled dll's, .cs files or even top level classes.
          - A strong set of libraries with methods and extensions to help you build more mods.
          - Create 1 file MonoMod patches to rewrite or inject new meta data to the assembly.

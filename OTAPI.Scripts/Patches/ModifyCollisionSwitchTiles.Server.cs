@@ -33,84 +33,89 @@ using MonoMod;
 [MonoModIgnore]
 partial class CollisionSwitchTiles
 {
-    static ParameterDefinition Entity { get; set; }
-    static MethodDefinition SwitchTiles { get; set; }
+    //static ParameterDefinition Entity { get; set; }
+    //static MethodDefinition SwitchTiles { get; set; }
 
     [Modification(ModType.PreMerge, "Patching Collision.SwitchTiles")]
     static void ModifyCollisionSwitchTiles(ModFramework.ModFwModder modder)
     {
         var csr = modder.GetILCursor(() => Terraria.Collision.SwitchTiles(default, 0, 0, default, 0));
-        SwitchTiles = csr.Method;
+        var redirects = csr.Method.DeclaringType.Methods
+            .Where(x => (HookEmitter.HookMethodNamePrefix + x.Name) == csr.Method.Name || ("orig_" + x.Name) == csr.Method.Name)
+            .Select(x => x.GetILCursor())
+            .ToArray();
+        //SwitchTiles = csr.Method;
 
-        csr.Method.Parameters.Add(Entity = new ParameterDefinition("entity",
-            ParameterAttributes.HasDefault | ParameterAttributes.Optional,
-
-            modder.Module.ImportReference(modder.GetDefinition<Terraria.Entity>())
-        )
+        foreach (var method in redirects.Append(csr))
         {
-            Constant = null
-        });
+            ParameterDefinition entity;
+            method.Method.Parameters.Add(entity = new("entity",
+                ParameterAttributes.HasDefault | ParameterAttributes.Optional,
 
-        modder.OnRewritingMethodBody += PatchCollisionSwitchTiles_OnRewritingMethodBody;
-
-        // inject the callback
-        {
-            // find all the HitSwitch calls
-            // add a branch around them, until after the SendData call
-
-            var calls = csr.Body.Instructions.Where(ins => ins.Operand is MethodReference mref && mref.Name == "HitSwitch").ToArray();
-
-            foreach (var hitswitch in calls)
+                modder.Module.ImportReference(modder.GetDefinition<Terraria.Entity>())
+            )
             {
-                var arg_x = hitswitch.Previous.Previous;
-                var arg_y = hitswitch.Previous;
+                Constant = null
+            });
 
-                csr.Goto(hitswitch, MonoMod.Cil.MoveType.Before);
-
-                //// find the continuation branch (via SendData)
-                //var continuation = hitswitch.Next(ins => ins.Operand is MethodReference mref && mref.Name == "SendData");
-
-                csr.Emit(OpCodes.Ldarg, Entity);
-                csr.EmitDelegate<PressurePlateCallback>(OTAPI.Hooks.Collision.InvokePressurePlate);
-                var cancellation = csr.EmitAll(
-                    new { OpCodes.Nop },
-                    new { OpCodes.Ldc_I4_0 },
-                    new { OpCodes.Ret }
-                );
-
-                // we consumed the stack with our callback, readd the x/y for the HitSwitch call to use
-                var continuation = csr.EmitAll(
-                    new { arg_x.OpCode, arg_x.Operand },
-                    new { arg_y.OpCode, arg_y.Operand }
-                );
-
-                var nop = cancellation.First();
-                nop.OpCode = OpCodes.Brtrue_S;
-                nop.Operand = continuation.First();
-            }
-        }
-    }
-
-    private static void PatchCollisionSwitchTiles_OnRewritingMethodBody(MonoModder modder, MethodBody body, Instruction instr, int instri)
-    {
-        if (instr.Operand is MethodReference methodReference)
-        {
-            if (methodReference.DeclaringType.Name == SwitchTiles.DeclaringType.Name
-                && methodReference.Name == SwitchTiles.Name)
+            modder.OnRewritingMethodBody += (MonoModder modder, MethodBody body, Instruction instr, int instri) =>
             {
-                if (methodReference.Parameters.Any(x => x.Name == Entity.Name))
+                if (instr.Operand is MethodReference methodReference &&
+                    methodReference.DeclaringType.Name == method.Method.DeclaringType.Name &&
+                    methodReference.Name == method.Method.Name
+                )
                 {
-                    return;
+                    if (methodReference.Parameters.Any(x => x.Name == entity.Name))
+                        return;
+
+                    methodReference.Parameters.Add(entity);
+
+                    if (body.Method.DeclaringType.BaseType.FullName == typeof(Terraria.Entity).FullName)
+                    {
+                        body.GetILProcessor().InsertBefore(instr,
+                            new { OpCodes.Ldarg_0 }
+                        );
+                    }
+                    else throw new NotImplementedException($"{body.Method.Name} is not a supported caller for this modification");
                 }
-                methodReference.Parameters.Add(Entity);
+            };
 
-                if (body.Method.DeclaringType.BaseType.FullName == typeof(Terraria.Entity).FullName)
+            // inject the callback if the target
+            if(method == csr)
+            {
+                // find all the HitSwitch calls
+                // add a branch around them, until after the SendData call
+
+                var calls = csr.Body.Instructions.Where(ins => ins.Operand is MethodReference mref && mref.Name == "HitSwitch").ToArray();
+
+                foreach (var hitswitch in calls)
                 {
-                    body.GetILProcessor().InsertBefore(instr,
-                        new { OpCodes.Ldarg_0 }
+                    var arg_x = hitswitch.Previous.Previous;
+                    var arg_y = hitswitch.Previous;
+
+                    csr.Goto(hitswitch, MonoMod.Cil.MoveType.Before);
+
+                    //// find the continuation branch (via SendData)
+                    //var continuation = hitswitch.Next(ins => ins.Operand is MethodReference mref && mref.Name == "SendData");
+
+                    csr.Emit(OpCodes.Ldarg, entity);
+                    csr.EmitDelegate<PressurePlateCallback>(OTAPI.Hooks.Collision.InvokePressurePlate);
+                    var cancellation = csr.EmitAll(
+                        new { OpCodes.Nop },
+                        new { OpCodes.Ldc_I4_0 },
+                        new { OpCodes.Ret }
                     );
+
+                    // we consumed the stack with our callback, readd the x/y for the HitSwitch call to use
+                    var continuation = csr.EmitAll(
+                        new { arg_x.OpCode, arg_x.Operand },
+                        new { arg_y.OpCode, arg_y.Operand }
+                    );
+
+                    var nop = cancellation.First();
+                    nop.OpCode = OpCodes.Brtrue_S;
+                    nop.Operand = continuation.First();
                 }
-                else throw new NotImplementedException($"{body.Method.Name} is not a supported caller for this modification");
             }
         }
     }

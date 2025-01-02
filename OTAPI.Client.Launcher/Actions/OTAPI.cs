@@ -30,7 +30,7 @@ namespace OTAPI.Client.Launcher.Actions;
 
 static class OTAPI
 {
-    static Assembly Terraria;
+    static Assembly? Terraria;
 
     static void CompileAndInstall() //considering to keep or not. this can recompile OTAPI mods on launch...which will be great for developing it. will look into when i get back to it one day
     {
@@ -113,7 +113,6 @@ static class OTAPI
         NativeLibrary.SetDllImportResolver(System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(steam), ResolveNativeDep);
 
         GC.Collect();
-
 
         CSharpLoader.OnCompilationContext += CSharpLoader_OnCompilationContext;
 
@@ -232,7 +231,7 @@ static class OTAPI
                 using var stream = root.GetManifestResourceStream(text);
                 if (stream is null) return null;
                 byte[] array = new byte[stream.Length];
-                stream.Read(array, 0, array.Length);
+                stream.ReadExactly(array);
                 stream.Seek(0, SeekOrigin.Begin);
 
                 // if (!File.Exists(resourceName))
@@ -267,10 +266,10 @@ static class OTAPI
         IEnumerable<string> matches = Enumerable.Empty<string>();
 
         foreach (var basePath in new[] {
-                Environment.CurrentDirectory,
-                AppContext.BaseDirectory,
-                Path.Combine(Environment.CurrentDirectory, "client")
-            })
+            Environment.CurrentDirectory,
+            AppContext.BaseDirectory,
+            Path.Combine(Environment.CurrentDirectory, "client")
+        })
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {

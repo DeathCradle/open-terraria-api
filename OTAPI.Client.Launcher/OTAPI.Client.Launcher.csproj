@@ -1,10 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<DebugType>embedded</DebugType>
 		<RunPostBuildEvent>Always</RunPostBuildEvent>
+		<UseCurrentRuntimeIdentifier Condition="'$(UseCurrentRuntimeIdentifier)' == ''">true</UseCurrentRuntimeIdentifier>
+		<SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
 	</PropertyGroup>
 	<ItemGroup>
 		<AvaloniaXaml Remove="Properties\**" />
@@ -27,15 +29,17 @@
 		<None Include="csharp\plugins\scripts\otapi\test-runtime.cs" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="0.10.18" />
-		<PackageReference Include="Avalonia.Desktop" Version="0.10.18" />
-		<PackageReference Include="Avalonia.Diagnostics" Version="0.10.18" />
-		<PackageReference Include="CefGlue.Avalonia" Version="91.4472.30" />
-		<PackageReference Include="CefGlue.Common" Version="91.4472.30" />
-		<PackageReference Include="Material.Avalonia" Version="2.5.1" />
-		<PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="5.5.0" />
-		<PackageReference Include="ReactiveUI" Version="18.3.1" />
-		<PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
+		<PackageReference Include="Avalonia" Version="11.2.3" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.2.3" />
+		<PackageReference Include="Avalonia.Diagnostics" Version="11.2.3" />
+		<PackageReference Include="CefGlue.Avalonia" Version="120.6099.210" />
+		<PackageReference Include="CefGlue.Common" Version="120.6099.210" />
+		<PackageReference Include="Material.Avalonia" Version="3.9.1" />
+		<PackageReference Include="Projektanker.Icons.Avalonia.FontAwesome" Version="9.6.0" />
+		<PackageReference Include="ReactiveUI" Version="20.1.63" />
+		<PackageReference Include="Steamworks.NET" Version="2024.8.0" />
+		<PackageReference Include="System.Private.Uri" Version="4.3.2" />
+		<PackageReference Include="System.Reactive.Linq" Version="6.0.1" />
 		<PackageReference Include="Microsoft.Win32.Registry" Version="6.0.0-preview.5.21301.5" GeneratePathProperty="true" />
 	</ItemGroup>
 	<ItemGroup>
@@ -48,14 +52,19 @@
 		</ProjectReference>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="ImGui.NET" Version="1.87.3" GeneratePathProperty="true" />
-		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.7" GeneratePathProperty="true" />
-		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.7" GeneratePathProperty="true" />
-		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.7" GeneratePathProperty="true" />
-		<PackageReference Include="MonoMod.RuntimeDetour.HookGen" Version="22.5.1.1" />
-		<PackageReference Include="SharpZipLib" Version="1.4.0" />
-		<PackageReference Include="System.Collections.Specialized" Version="4.3.0" />
-		<PackageReference Include="System.Drawing.Primitives" Version="4.3.0" />
+		<PackageReference Include="ImGui.NET" Version="1.91.0.1" GeneratePathProperty="true" />
+		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.11" GeneratePathProperty="true" />
+		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.11" GeneratePathProperty="true" />
+		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.11" GeneratePathProperty="true" />
+		<PackageReference Include="SharpZipLib" Version="1.4.2" />
+		<PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+		<PackageReference Include="MonoMod.RuntimeDetour.HookGen" Version="22.7.31.1" />
+		<PackageReference Include="MonoMod" Version="22.7.31.1">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</PackageReference>
+		<PackageReference Include="MonoMod.RuntimeDetour" Version="25.2.2">
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</PackageReference>
 	</ItemGroup>
 	<Target Name="CleanAll" AfterTargets="Clean">
 		<RemoveDir Directories="$(OUTDIR)" />
@@ -79,7 +88,7 @@
 			<DependentUpon>MessageBoxWindow.axaml</DependentUpon>
 		</Compile>
 	</ItemGroup>
-	<Target Name="PostBuild" AfterTargets="AfterBuild;PostBuildEvent">
+	<Target Name="PostBuild" AfterTargets="AfterBuild;PreBuildEvent">
 		<Message Text="Copying OTAPI patch files" Importance="high" />
 		<MakeDir Directories="$(TargetDir)modifications/" />
 		<RemoveDir Directories="$(TargetDir)modifications/" />
@@ -121,7 +130,7 @@
 		<Copy SourceFiles="@(ClientLua)" DestinationFolder="$(TargetDir)lua/%(RecursiveDir)" />
 
 		<Copy SourceFiles="$(PkgMicrosoft_Win32_Registry)/lib/netstandard2.0/Microsoft.Win32.Registry.dll" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="false" />
-		<Copy SourceFiles="$(PkgImGui_NET)/runtimes/osx-universal/native/libcimgui.dylib" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="false" />
+		<Copy SourceFiles="$(PkgImGui_NET)/runtimes/osx/native/libcimgui.dylib" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="false" />
 	</Target>
 	<Target Name="AfterPrepareForPublish" AfterTargets="Publish">
 		<Message Text="Copying release OTAPI patch files" Importance="high" />
@@ -215,7 +224,7 @@
 	</Target>
 	<Target Name="CreateScriptAfterPublish" AfterTargets="Publish" Condition="'$(RuntimeIdentifier)' != 'win-x64'">
 		<Copy SourceFiles="$(ProjectDir)OTAPI.sh" DestinationFolder="$(PublishDir)" />
-        <Exec Command="chmod +x $(PublishDir)OTAPI.sh" />
-        <Message Text="Run the launcher with: cd bin/$(Configuration)/$(TargetFramework)/$(RuntimeIdentifier)/publish &amp;&amp; ./OTAPI.sh" Importance="High" />
+		<Exec Command="chmod +x $(PublishDir)OTAPI.sh" />
+		<Message Text="Run the launcher with: cd bin/$(Configuration)/$(TargetFramework)/$(RuntimeIdentifier)/publish &amp;&amp; ./OTAPI.sh" Importance="High" />
 	</Target>
 </Project>

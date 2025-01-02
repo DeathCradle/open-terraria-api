@@ -36,38 +36,38 @@ jobs:
     name: ${{ matrix.profile.name }} Server
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
 
-      - uses: actions/setup-dotnet@v3
+      - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '9.0.x'
 
       - name: Build the project
         run: |
           dotnet build OTAPI.Mods.slnf
-          (cd OTAPI.Patcher/bin/Debug/net6.0 && exec dotnet run --project ../../../OTAPI.Patcher.csproj -patchTarget=${{ matrix.profile.patch_target }} -latest=n --framework net6.0)
+          (cd OTAPI.Patcher/bin/Debug/net9.0 && exec dotnet run --project ../../../OTAPI.Patcher.csproj -patchTarget=${{ matrix.profile.patch_target }} -latest=n --framework net9.0)
           dotnet build OTAPI.Server.Launcher.slnf
-          (cd OTAPI.Server.Launcher/bin/Debug/net6.0 && exec dotnet OTAPI.Server.Launcher.dll -test-init)
+          (cd OTAPI.Server.Launcher/bin/Debug/net9.0 && exec dotnet OTAPI.Server.Launcher.dll -test-init)
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.profile.name }} NuGet Package
-          path: OTAPI.Patcher/bin/Debug/net6.0/${{ matrix.profile.package_path }}
+          path: OTAPI.Patcher/bin/Debug/net9.0/${{ matrix.profile.package_path }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.profile.name }} Binaries
           path: |
-            OTAPI.Patcher/bin/Debug/net6.0/artifact-*/*
+            OTAPI.Patcher/bin/Debug/net9.0/artifact-*/*
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.profile.name }} Wiki MD files
-          path: OTAPI.Patcher/bin/Debug/net6.0/*.mfw.md
+          path: OTAPI.Patcher/bin/Debug/net9.0/*.mfw.md
 
       - name: "Releasing to NuGet: ${{ matrix.profile.name }}"
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: dotnet nuget push OTAPI.Patcher/bin/Debug/net6.0/${{ matrix.profile.package_path }} --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY"
+        run: dotnet nuget push OTAPI.Patcher/bin/Debug/net9.0/${{ matrix.profile.package_path }} --source https://api.nuget.org/v3/index.json --api-key "$NUGET_API_KEY"

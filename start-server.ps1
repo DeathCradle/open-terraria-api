@@ -7,7 +7,7 @@ function Write-RuntimeConfig {
 
     $runtimejson = @{
         "runtimeOptions"= @{
-        "tfm"= "net6.0"
+        "tfm"= "net9.0"
         "framework"= @{
             "name"= "Microsoft.NETCore.App"
             "version"= "6.0.0"
@@ -31,8 +31,8 @@ function PC-Server {
     Find-Package -Name Mono.Cecil -ProviderName NuGet | Install-Package -Destination ./server/packages -SkipDependencies
     Find-Package -Name Newtonsoft.Json -ProviderName NuGet | Install-Package -Destination ./server/packages -SkipDependencies
 
-    Copy-Item "./server/packages/OTAPI.Upcoming.3*/lib/net6.0/OTAPI.dll" -Destination "./server/pc/"
-    Copy-Item "./server/packages/ModFramework*/lib/net6.0/ModFramework.dll" -Destination "./server/pc/"
+    Copy-Item "./server/packages/OTAPI.Upcoming.3*/lib/net9.0/OTAPI.dll" -Destination "./server/pc/"
+    Copy-Item "./server/packages/ModFramework*/lib/net9.0/ModFramework.dll" -Destination "./server/pc/"
     Copy-Item "./server/packages/MonoMod*/lib/net5.0/MonoMod.dll" -Destination "./server/pc/"
     Copy-Item "./server/packages/MonoMod.Utils*/lib/net5.0/MonoMod.Utils.dll" -Destination "./server/pc/"
     Copy-Item "./server/packages/MonoMod.RuntimeDetour*/lib/net5.0/MonoMod.RuntimeDetour.dll" -Destination "./server/pc/"
@@ -60,8 +60,8 @@ function Mobile-Server {
     Find-Package -Name Newtonsoft.Json -ProviderName NuGet | Install-Package -Destination ./server/packages -SkipDependencies
     Find-Package -Name System.IO.Packaging -ProviderName NuGet | Install-Package -Destination ./server/packages -SkipDependencies
 
-    Copy-Item "./server/packages/OTAPI.Upcoming.Mobile*/lib/net6.0/OTAPI.dll" -Destination "./server/mobile/"
-    Copy-Item "./server/packages/ModFramework*/lib/net6.0/ModFramework.dll" -Destination "./server/mobile/"
+    Copy-Item "./server/packages/OTAPI.Upcoming.Mobile*/lib/net9.0/OTAPI.dll" -Destination "./server/mobile/"
+    Copy-Item "./server/packages/ModFramework*/lib/net9.0/ModFramework.dll" -Destination "./server/mobile/"
     Copy-Item "./server/packages/MonoMod*/lib/net5.0/MonoMod.dll" -Destination "./server/mobile/"
     Copy-Item "./server/packages/MonoMod.Utils*/lib/net5.0/MonoMod.Utils.dll" -Destination "./server/mobile/"
     Copy-Item "./server/packages/MonoMod.RuntimeDetour*/lib/net5.0/MonoMod.RuntimeDetour.dll" -Destination "./server/mobile/"
@@ -98,11 +98,11 @@ function TML-Server {
 
     Expand-Archive -Force ./server/tModLoader.zip -DestinationPath ./server/tModLoader
 
-    Copy-Item "./server/packages/OTAPI.Upcoming.tModLoader*/lib/net6.0/OTAPI.dll" -Destination "./server/tModLoader/"
-    Copy-Item "./server/packages/OTAPI.Upcoming.tModLoader*/lib/net6.0/OTAPI.Runtime.dll" -Destination "./server/tModLoader/"
+    Copy-Item "./server/packages/OTAPI.Upcoming.tModLoader*/lib/net9.0/OTAPI.dll" -Destination "./server/tModLoader/"
+    Copy-Item "./server/packages/OTAPI.Upcoming.tModLoader*/lib/net9.0/OTAPI.Runtime.dll" -Destination "./server/tModLoader/"
 
-    New-Item -ItemType Directory -Force -Path ./server/tModLoader/Libraries/ModFramework/1.0.46-alpha/lib/net6.0
-    Copy-Item "./server/packages/ModFramework*/lib/net6.0/ModFramework.dll" -Destination "./server/tModLoader/Libraries/ModFramework/1.0.46-alpha/lib/net6.0"
+    New-Item -ItemType Directory -Force -Path ./server/tModLoader/Libraries/ModFramework/1.0.46-alpha/lib/net9.0
+    Copy-Item "./server/packages/ModFramework*/lib/net().0/ModFramework.dll" -Destination "./server/tModLoader/Libraries/ModFramework/1.0.46-alpha/lib/net9.0"
 
     New-Item -ItemType Directory -Force -Path ./server/tModLoader/Libraries/monomod/22.5.1.1/lib/net5.0
     Copy-Item "./server/packages/MonoMod*/lib/net5.0/MonoMod.dll" -Destination "./server/tModLoader/Libraries/monomod/22.5.1.1/lib/net5.0"
@@ -154,7 +154,7 @@ function TML-Server {
         }
     }
 
-    Add-Deps-Package -AssemblyName "ModFramework" -AssemblyVersion "1.0.46-alpha" -FrameworkVersion "net6.0"
+    Add-Deps-Package -AssemblyName "ModFramework" -AssemblyVersion "1.0.46-alpha" -FrameworkVersion "net9.0"
     Add-Deps-Package -AssemblyName "MonoMod" -AssemblyVersion "22.5.1.1" -FrameworkVersion "net5.0"
 
     $json = $deps | ConvertTo-Json -Depth 100

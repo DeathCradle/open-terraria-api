@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2020 DeathCradle
+Copyright (C) 2020-2024 SignatureBeef
 
 This file is part of Open Terraria API v3 (OTAPI)
 
@@ -59,7 +59,8 @@ public static class MessageBox
             }
         };
         wnd.Show();
-        Application.Current.Run(wnd);
+        var app = Application.Current ?? throw new System.Exception("Failed to launch MessageBoxWindow");
+        app.Run(wnd);
     }
 }
 

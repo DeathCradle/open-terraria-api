@@ -20,14 +20,16 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Newtonsoft.Json.Linq;
+using Mono.Cecil;
+using Mono.Cecil.Cil;
 using OTAPI.Client.Launcher.Targets;
 using OTAPI.Common;
 using OTAPI.Patcher.Targets;
 using System;
-using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace OTAPI.Client.Launcher;
 
@@ -80,14 +82,17 @@ public partial class MainWindow : Window
 
         if (Program.ConsoleWriter is not null)
             Program.ConsoleWriter.LineReceived += OnConsoleLineReceived;
+
+        PatchMonoMod();
     }
 
     private void OnConsoleLineReceived(string line)
     {
         Context.Console.Insert(0, $"[{DateTime.Now:yyyyMMdd HH:mm:ss}] {line}");
+        System.Diagnostics.Debug.WriteLine($"[OTAPI.Launcher] {line}");
     }
 
-    protected override void OnClosing(CancelEventArgs e)
+    protected override void OnClosing(WindowClosingEventArgs e)
     {
         base.OnClosing(e);
         _watcher?.Dispose();
@@ -204,13 +209,17 @@ public partial class MainWindow : Window
         process.Start();
     }
 
+    System.Threading.CancellationTokenSource CancellationTokenSource { get; set; } = new System.Threading.CancellationTokenSource();
+
     public void OnInstall(object sender, RoutedEventArgs e)
     {
         if (Context.IsInstalling || Context.InstallPath?.Path is null || Context.LaunchTarget is null) return;
         Context.IsInstalling = true;
 
-        new System.Threading.Thread(() =>
+        Task.Run(async () =>
         {
+            CancellationTokenSource.Cancel();
+            CancellationTokenSource = new();
             try
             {
                 var target = new PCClientTarget();
@@ -221,7 +230,7 @@ public partial class MainWindow : Window
                 Context.InstallStatus = "Patching completed, installing to existing installation...";
 
                 Context.InstallPath.Target.StatusUpdate += (sender, e) => Context.InstallStatus = e.Text;
-                Context.InstallPath.Target.Install(Context.InstallPath.Path);
+                await Context.InstallPath.Target.InstallAsync(Context.InstallPath.Path, CancellationTokenSource.Token);
 
                 Context.InstallStatus = "Install completed";
 
@@ -235,6 +244,49 @@ public partial class MainWindow : Window
                 Context.InstallStatus = "Err: " + ex.ToString();
                 OnConsoleLineReceived(ex.ToString());
             }
-        }).Start();
+        });
+    }
+
+    /// <summary>
+    /// Current MonoMod is outdated, and the new reorg is not ready yet, however we need v25 RD for NET9, yet Patcher v22 is the latest, and is not compatible with v25.
+    /// Ultimately the problem is OTAPI Client using both at once, unlike the server setup which doesnt.
+    /// For now, the intention is to replace the entire both with "return new string[0];" to prevent the GAC IL from being used (which it isn't anyway)
+    /// </summary>
+    void PatchMonoMod()
+    {
+        var bin = File.ReadAllBytes("MonoMod.dll");
+        using MemoryStream ms = new(bin);
+        var asm = AssemblyDefinition.ReadAssembly(ms);
+        var modder = asm.MainModule.Types.Single(x => x.FullName == "MonoMod.MonoModder");
+        var gacPaths = modder.Methods.Single(m => m.Name == "get_GACPaths");
+        var il = gacPaths.Body.GetILProcessor();
+        if (il.Body.Instructions.Count != 3)
+        {
+            il.Body.Instructions.Clear();
+            il.Emit(OpCodes.Ldc_I4_0);
+            il.Emit(OpCodes.Newarr, asm.MainModule.ImportReference(typeof(string)));
+            il.Emit(OpCodes.Ret);
+
+            // clear MonoModder.MatchingConditionals(cap, asmName), with "return false;"
+            var mc = modder.Methods.Single(m => m.Name == "MatchingConditionals" && m.Parameters.Count == 2 && m.Parameters[1].ParameterType.Name == "AssemblyNameReference");
+            il = mc.Body.GetILProcessor();
+            mc.Body.Instructions.Clear();
+            mc.Body.Variables.Clear();
+            mc.Body.ExceptionHandlers.Clear();
+            il.Emit(OpCodes.Ldc_I4_1);
+            il.Emit(OpCodes.Ret);
+
+            var writerParams = modder.Methods.Single(m => m.Name == "get_WriterParameters");
+            il = writerParams.Body.GetILProcessor();
+            var get_Current = writerParams.Body.Instructions.Single(x => x.Operand is MethodReference mref && mref.Name == "get_Current");
+            // replace get_Current with a number, and remove the bitwise checks
+            il.Remove(get_Current.Next);
+            il.Remove(get_Current.Next);
+            il.Replace(get_Current, Instruction.Create(
+                OpCodes.Ldc_I4, RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 37 : 0
+            ));
+
+            asm.Write("MonoMod.dll");
+        }
     }
 }

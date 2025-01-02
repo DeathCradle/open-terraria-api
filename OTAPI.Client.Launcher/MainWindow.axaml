@@ -23,7 +23,7 @@
     </Style>
 
     <Style Selector="TextBox.install-path">
-      <Setter Property="FontSize" Value="8" />
+      <Setter Property="FontSize" Value="15" />
       <Setter Property="FontWeight" Value="300" />
     </Style>
     <Style Selector="TextBlock.h1">
@@ -169,7 +169,7 @@
       Plugins
     </TextBlock>
     <ScrollViewer Height="200" Classes="scrollview">
-      <ItemsControl Items="{Binding Plugins}">
+      <ItemsControl ItemsSource="{Binding Plugins}">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
             <CheckBox Margin="4"
@@ -184,10 +184,8 @@
       Status
     </TextBlock>
     <ScrollViewer Height="100" Classes="scrollview">
-      <!--<TextBlock Classes="installStatus"
-                 Text="{Binding InstallStatus}" />-->
       
-      <ItemsControl Items="{Binding Console}">
+      <ItemsControl ItemsSource="{Binding Console}">
         <ItemsControl.ItemTemplate>
           <DataTemplate>
             <TextBlock Margin="5" Text="{Binding}" />

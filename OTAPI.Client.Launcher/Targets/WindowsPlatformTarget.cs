@@ -19,6 +19,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 using OTAPI.Common;
 using System;
 using System.IO;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace OTAPI.Client.Launcher.Targets;
 
@@ -30,7 +32,7 @@ public class WindowsPlatformTarget : WindowsInstallDiscoverer, IPlatformTarget
         vm.VanillaExe = (vm.InstallPath?.Path is not null && Directory.Exists(vm.InstallPath.Path)) ? Path.Combine(vm.InstallPath.Path, "Terraria.exe") : null;
     }
 
-    public void Install(string installPath)
+    public async Task InstallAsync(string installPath, CancellationToken cancellationToken)
     {
         var sourceContentPath = Path.Combine(installPath, "Content");
         var clientPath = Path.Combine(Environment.CurrentDirectory, "client");
@@ -41,10 +43,10 @@ public class WindowsPlatformTarget : WindowsInstallDiscoverer, IPlatformTarget
 #endif
 
         Console.WriteLine(Status = "Installing FNA libs...");
-        this.InstallLibs(clientPath);
+        await this.InstallLibsAsync(clientPath, cancellationToken);
 
         Console.WriteLine(Status = "Installing Steamworks...");
-        this.InstallSteamworks64(clientPath, installPath);
+        await this.InstallSteamworks64Async(clientPath, installPath, cancellationToken);
 
         Console.WriteLine(Status = "Linking Terraria Content files...");
         if (!Directory.Exists(destContentPath))

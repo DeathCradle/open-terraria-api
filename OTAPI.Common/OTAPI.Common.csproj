@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>disable</Nullable>
 	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Win32.Registry" Version="6.0.0-preview.5.21301.5" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Win32.Registry" Version="6.0.0-preview.5.21301.5" />
+	</ItemGroup>
 
-  <Target Name="CleanAll" AfterTargets="Clean">
+	<Target Name="CleanAll" AfterTargets="Clean">
 		<RemoveDir Directories="$(OUTDIR)" />
 	</Target>
 </Project>

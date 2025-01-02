@@ -28,13 +28,6 @@ namespace LauncherScript
         public static void OnRunning()
         {
             Console.WriteLine("[LauncherScript] Hello World! from a script");
-            On.Terraria.Program.LaunchGame += Program_LaunchGame;
-        }
-
-        private static void Program_LaunchGame(On.Terraria.Program.orig_LaunchGame orig, string[] args, bool monoArgs)
-        {
-            Console.WriteLine("[LauncherScript] LaunchGame was called!");
-            orig(args, monoArgs);
         }
     }
 }
