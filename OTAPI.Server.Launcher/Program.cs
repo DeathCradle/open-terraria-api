@@ -57,6 +57,19 @@ static void Program_LaunchGame(object sender, HookEvents.Terraria.Program.Launch
         SavePath.SetValue(null, Terraria.Program.LaunchParameters.ContainsKey("-savedirectory") ? Terraria.Program.LaunchParameters["-savedirectory"] : Platform.Get<IPathService>().GetStoragePath("Terraria"));
     }
 
+    HookEvents.Terraria.Main.Initialize += (s, args) =>
+    {
+        args.ContinueExecution = false;
+        args.OriginalMethod();
+
+        Terraria.Main.instance._achievements = new Terraria.Achievements.AchievementManager();
+        Hooks.Initializers.AchievementInitializerLoad += (_, e) =>
+        {
+            e.ShouldLoad = true;
+        };
+        Terraria.Initializers.AchievementInitializer.Load();
+    };
+
     // Steamworks.NET is not supported on ARM64, and will cause a crash
     // TODO: create a shim generator in modfw to dynamically remove this for servers while keeping API compatibility
     // Terraria.Main.SkipAssemblyLoad = true;
@@ -167,6 +180,7 @@ static void Program_OnLaunched(object sender, EventArgs e)
         //Console.WriteLine($"RemoteClient.Reset: HOOK ID#{rc.Id} IsActive:{rc.IsActive},PT:{rc.PendingTermination}");
         orig(rc);
     };
+    
 }
 
 static void Main_ctor(On.Terraria.Main.orig_ctor orig, Terraria.Main self)

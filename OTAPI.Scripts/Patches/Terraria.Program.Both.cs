@@ -92,7 +92,11 @@ namespace Terraria
         {
             Configure();
 
-            Console.WriteLine($"[OTAPI] Starting up ({CSV(OTAPI.Common.Target, OTAPI.Common.Version, OTAPI.Common.GitHubCommit, $"ModFw:{OTAPI.Common.ModFramework.Version}")}).");
+            Console.WriteLine($"[OTAPI] Starting up ({CSV(
+                OTAPI.Common.Target.Replace("OTAPI", "").Trim(),
+                OTAPI.Common.VersionShort, 
+                $"ModFw:{OTAPI.Common.ModFramework.VersionShort}"
+            )}).");
 
             // set Assembly type to Terraria/OTAPI for runtime plugins to resolve easier when they dont have a direct ref
             ModContext.Parameters.Add(Assembly.GetExecutingAssembly());
@@ -182,6 +186,11 @@ namespace OTAPI
         public static readonly string Version;
 
         /// <summary>
+        /// Returns the current version string of OTAPI with a short hash name
+        /// </summary>
+        public static readonly string VersionShort;
+
+        /// <summary>
         /// The short git hash of the commit used to produce this assembly.
         /// </summary>
         public static readonly string GitHubCommit;
@@ -193,6 +202,11 @@ namespace OTAPI
             /// Returns the current version string of ModFramework
             /// </summary>
             public static readonly string Version;
+
+            /// <summary>
+            /// Returns the current version string of ModFramework with a short hash name
+            /// </summary>
+            public static readonly string VersionShort;
         }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }

@@ -11,7 +11,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="ModFramework" Version="1.1.11" />
+		<PackageReference Include="ModFramework" Version="1.1.12" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="OTAPI.Runtime">

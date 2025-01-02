@@ -32,7 +32,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\FNA\FNA.Core.csproj" />
 		<PackageReference Include="Steamworks.NET" Version="2024.8.0" />
-		<PackageReference Include="ModFramework" Version="1.1.11" />
+		<PackageReference Include="ModFramework" Version="1.1.12" />
 		<PackageReference Include="MonoMod" Version="22.7.31.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
