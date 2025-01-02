@@ -3,16 +3,16 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net9.0</TargetFramework>
-		<Version>3.2.1</Version>
+		<Version>3.2.2</Version>
 		<PreserveCompilationContext>true</PreserveCompilationContext>
 		<RuntimeIdentifiers>win;osx;linux;</RuntimeIdentifiers>
 		<Nullable>enable</Nullable>
 		<PackageReleaseNotes>Terraria 1.4.4.9 on .NET9</PackageReleaseNotes>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.12" />
-		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.12" />
-		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.12" />
+		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.13" />
+		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.13" />
+		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.13" />
 		<PackageReference Include="Steamworks.NET" Version="2024.8.0" />
 		<PackageReference Include="MonoMod.RuntimeDetour.HookGen" Version="22.7.31.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
