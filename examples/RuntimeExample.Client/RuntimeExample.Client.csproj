@@ -11,7 +11,7 @@
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="ModFramework" Version="1.1.12" />
+		<PackageReference Include="ModFramework" Version="1.1.13" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="OTAPI.Runtime">
@@ -25,6 +25,6 @@
 		</Reference>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="ImGui.NET" Version="1.78.0" />
+		<PackageReference Include="ImGui.NET" Version="1.91.0.1" />
 	</ItemGroup>
 </Project>
