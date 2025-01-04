@@ -25,6 +25,7 @@ using MonoMod.Cil;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 using System.Linq;
+using MonoMod;
 
 /// <summary>
 /// @doc Creates Hooks.NPC.BossBag. Allows plugins to customize bosses loot as well as distributing it.
@@ -36,6 +37,45 @@ partial class NpcBossBag
     [Modification(ModType.PreMerge, "Hooking NPC Boss Bag")]
     static void HookNpcBossBag(ModFwModder modder)
     {
+        foreach (var csr in new[] {
+            modder.GetILCursor(() => (new Terraria.NPC()).DropItemInstanced(default, default, 0, 0, false)),
+            modder.GetILCursor(() => Terraria.GameContent.ItemDropRules.CommonCode.DropItemLocalPerClientAndSetNPCMoneyTo0(default, default, default, default))
+        })
+        {
+            csr.GotoNext(MoveType.After,
+                i => i.OpCode == OpCodes.Ldsfld &&
+                     i.Operand is FieldReference fieldReference &&
+                     fieldReference.Name == "netMode" &&
+                     fieldReference.DeclaringType.FullName == "Terraria.Main",
+                i => i.OpCode == OpCodes.Ldc_I4_2,
+                i => i.OpCode == OpCodes.Bne_Un
+            );
+
+            csr.Emit(OpCodes.Ldarg_0);
+            if (csr.Method.Name == "DropItemLocalPerClientAndSetNPCMoneyTo0")
+            {
+                csr.Emit(OpCodes.Ldarg_1);
+                csr.Emit(OpCodes.Ldarg_2);
+                csr.Emit(OpCodes.Ldarg_3);
+            }
+            else
+            {
+                csr.Emit(OpCodes.Ldarg_3);
+                csr.Emit(OpCodes.Ldarg, 4);
+                csr.Emit(OpCodes.Ldarg, 5);
+            }
+            csr.EmitDelegate(OTAPI.Hooks.NPC.InvokeBossBag);
+            csr.Emit(OpCodes.Nop);
+            csr.Emit(OpCodes.Nop);
+
+            csr.Previous.Previous.OpCode = OpCodes.Brtrue;
+            csr.Previous.Previous.Operand = csr.Next;
+
+            var targetBranch = csr.Method.Body.Instructions.Reverse().Where(x => x.OpCode == OpCodes.Ldarg_0).FirstOrDefault();
+
+            csr.Previous.OpCode = OpCodes.Br;
+            csr.Previous.Operand = targetBranch;
+        }
         var csr = modder.GetILCursor(() => Terraria.GameContent.ItemDropRules.CommonCode.DropItemLocalPerClientAndSetNPCMoneyTo0(default, default, default, true));
         csr.GotoNext(MoveType.After,
                      i => i.OpCode == OpCodes.Ldsfld &&
