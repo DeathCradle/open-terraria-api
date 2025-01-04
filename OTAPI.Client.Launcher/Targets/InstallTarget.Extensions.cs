@@ -290,13 +290,13 @@ using System.Runtime.Versioning;
         public string? BrowserDownloadUrl { get; set; }
     }
 
-    public static string PublishHostLauncher(this IPlatformTarget target)
+    public static async Task<string> PublishHostLauncherAsync(this IPlatformTarget target)
     {
-        var url = "https://api.github.com/repos/DeathCradle/Open-Terraria-API/releases";
+        var url = "https://api.github.com/repos/SignatureBeef/Open-Terraria-API/releases";
 
         using HttpClient client = new();
         client.DefaultRequestHeaders.UserAgent.ParseAdd("OTAPI3-Installer");
-        var data = client.GetStringAsync(url).Result;
+        var data = await client.GetStringAsync(url);
         var releases = Newtonsoft.Json.JsonConvert.DeserializeObject<GHRelease[]>(data) ?? throw new Exception("Unable to read release data");
 
         GHRelease release;
@@ -311,7 +311,7 @@ using System.Runtime.Versioning;
             ?? throw new Exception("Failed to find zip file in installer release");
 
         Console.WriteLine(target.Status = "Downloading launcher, this may take a long time...");
-        using var launcher = client.GetStreamAsync(url).Result;
+        using var launcher = await client.GetStreamAsync(url);
 
         if (File.Exists("launcher.zip")) File.Delete("launcher.zip");
         using (var fs = File.OpenWrite("launcher.zip"))
@@ -320,7 +320,7 @@ using System.Runtime.Versioning;
             int read;
             while (launcher.CanRead)
             {
-                if ((read = launcher.Read(buffer, 0, buffer.Length)) == 0)
+                if ((read = await launcher.ReadAsync(buffer, 0, buffer.Length)) == 0)
                     break;
 
                 fs.Write(buffer, 0, read);
@@ -471,7 +471,7 @@ using System.Runtime.Versioning;
 
     public async static Task InstallLibsAsync(this IPlatformTarget target, string installPath, CancellationToken cancellationToken)
     {
-        var zipPath = await target.DownloadZipAsync("https://github.com/DeathCradle/fnalibs/raw/main/fnalibs.20211125.tar.bz2", "fnalibs", cancellationToken);
+        var zipPath = await target.DownloadZipAsync("https://github.com/SignatureBeef/fnalibs/raw/refs/heads/main/fnalibs.20241231.tar.bz2", "fnalibs", cancellationToken);
         target.ExtractBZip2(zipPath, installPath);
     }
 
@@ -502,7 +502,7 @@ using System.Runtime.Versioning;
         }
     }
 
-    public static void PatchOSXLaunch(this IPlatformTarget target, string installPath)
+    public static async Task PatchOSXLaunchAsync(this IPlatformTarget target, string installPath)
     {
         var launch_script = Path.Combine(installPath, "MacOS/Terraria");
         var backup_launch_script = Path.Combine(installPath, "MacOS/Terraria.bak.otapi");
@@ -554,9 +554,8 @@ fi
         // publish and copy OTAPI.Client.Launcher
         {
             Console.WriteLine("Publishing and creating launcher...this will take a while.");
-            var output = target.PublishHostLauncher();
+            var output = await target.PublishHostLauncherAsync();
             var launcher = Path.Combine(output, "Terraria");
-            //var otapi = Path.Combine(installPath, "OTAPI.Client.Launcher");
 
             if (!File.Exists(launcher))
                 throw new Exception($"Failed to produce launcher to: {launcher}");
@@ -566,7 +565,7 @@ fi
         }
     }
 
-    public static void PatchWindowsLaunch(this IPlatformTarget target, string installPath)
+    public static async Task PatchWindowsLaunch(this IPlatformTarget target, string installPath)
     {
         var launch_file = Path.Combine(installPath, "Terraria.exe");
 
@@ -582,7 +581,7 @@ fi
 
         // publish and copy OTAPI.Client.Launcher
         {
-            var output = target.PublishHostLauncher();
+            var output = await target.PublishHostLauncherAsync();
             var launcher = Path.Combine(output, "Terraria.exe");
 
             if (!File.Exists(launcher))
@@ -595,7 +594,7 @@ fi
         }
     }
 
-    public static void PatchLinuxLaunch(this IPlatformTarget target, string installPath)
+    public static async Task PatchLinuxLaunch(this IPlatformTarget target, string installPath)
     {
         var otapi_launcher = Path.Combine(installPath, "otapi_launcher");
         var launch_script = Path.Combine(installPath, "Terraria");
@@ -651,9 +650,8 @@ fi
         // publish and copy OTAPI.Client.Launcher
         {
             Console.WriteLine("Publishing and creating launcher...this will take a while.");
-            var output = target.PublishHostLauncher();
+            var output = await target.PublishHostLauncherAsync();
             var launcher = Path.Combine(output, "Terraria");
-            //var otapi = Path.Combine(installPath, "OTAPI.Client.Launcher");
 
             if (!File.Exists(launcher))
                 throw new Exception($"Failed to produce launcher to: {launcher}");

@@ -59,6 +59,11 @@ namespace OTAPI
         public static readonly string Version = GetVersion();
 
         /// <summary>
+        /// Returns the current version string of OTAPI with a short hash name
+        /// </summary>
+        public static readonly string VersionShort = Version[..(Version.IndexOf('+')+1 + 7/* commit hash */)];
+
+        /// <summary>
         /// The file name(no ext.) of the file that was patched.
         /// e.g. tModLoaderServer
         /// </summary>
@@ -112,6 +117,11 @@ namespace OTAPI
             /// Returns the current version string of ModFramework
             /// </summary>
             public static readonly string Version = GetVersion(typeof(global::ModFramework.ModFwModder).Assembly);
+
+            /// <summary>
+            /// Returns the current version string of ModFramework with a short hash name
+            /// </summary>
+            public static readonly string VersionShort = Version[..(Version.IndexOf('+')+1 + 7/* commit hash */)];
         }
     }
 }

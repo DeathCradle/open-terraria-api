@@ -1,30 +1,30 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+	</PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\ModFramework\ModFramework.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="OTAPI.Runtime">
-      <HintPath>..\..\OTAPI.Client.Installer\bin\Debug\net472\OTAPI.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="OTAPI">
-      <HintPath>..\..\OTAPI.Patcher\bin\Debug\net9.0\OTAPI.exe</HintPath>
-    </Reference>
-    <Reference Include="FNA">
-      <HintPath>..\..\OTAPI.Patcher\bin\Debug\net9.0\FNA.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="ImGui.NET" Version="1.78.0" />
-  </ItemGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="ModFramework" Version="1.1.13" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="OTAPI.Runtime">
+			<HintPath>..\..\OTAPI.Client.Launcher\bin\Debug\$(TargetFramework)\client\OTAPI.Runtime.dll</HintPath>
+		</Reference>
+		<Reference Include="OTAPI">
+			<HintPath>..\..\OTAPI.Client.Launcher\bin\Debug\$(TargetFramework)\client\OTAPI.exe</HintPath>
+		</Reference>
+		<Reference Include="FNA">
+			<HintPath>..\..\OTAPI.Patcher\bin\Debug\$(TargetFramework)\FNA.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="ImGui.NET" Version="1.78.0" />
+	</ItemGroup>
 </Project>

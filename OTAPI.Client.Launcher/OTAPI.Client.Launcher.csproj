@@ -5,6 +5,8 @@
 		<Nullable>enable</Nullable>
 		<DebugType>embedded</DebugType>
 		<RunPostBuildEvent>Always</RunPostBuildEvent>
+		<UseCurrentRuntimeIdentifier Condition="'$(UseCurrentRuntimeIdentifier)' == ''">true</UseCurrentRuntimeIdentifier>
+		<SelfContained Condition="'$(SelfContained)' == ''">false</SelfContained>
 	</PropertyGroup>
 	<ItemGroup>
 		<AvaloniaXaml Remove="Properties\**" />
@@ -51,9 +53,9 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="ImGui.NET" Version="1.91.0.1" GeneratePathProperty="true" />
-		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.11" GeneratePathProperty="true" />
-		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.11" GeneratePathProperty="true" />
-		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.11" GeneratePathProperty="true" />
+		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.13" GeneratePathProperty="true" />
+		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.13" GeneratePathProperty="true" />
+		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.13" GeneratePathProperty="true" />
 		<PackageReference Include="SharpZipLib" Version="1.4.2" />
 		<PackageReference Include="System.Drawing.Common" Version="9.0.0" />
 		<PackageReference Include="MonoMod.RuntimeDetour.HookGen" Version="22.7.31.1" />
@@ -86,7 +88,7 @@
 			<DependentUpon>MessageBoxWindow.axaml</DependentUpon>
 		</Compile>
 	</ItemGroup>
-	<Target Name="PostBuild" AfterTargets="AfterBuild;PostBuildEvent">
+	<Target Name="PostBuild" AfterTargets="AfterBuild;PreBuildEvent">
 		<Message Text="Copying OTAPI patch files" Importance="high" />
 		<MakeDir Directories="$(TargetDir)modifications/" />
 		<RemoveDir Directories="$(TargetDir)modifications/" />

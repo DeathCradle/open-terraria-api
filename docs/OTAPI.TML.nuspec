@@ -14,7 +14,7 @@
 
         OTAPI is primarily a server modification and is available as a cross platform package via NuGet.
 
-        Version 3.0 is now a .9 library thanks to ModFramework being able to retarget the .NET4 vanilla assembly up to .NET9.
+        Version 3.0 is now a .NET9 library thanks to ModFramework being able to retarget the .NET4 vanilla assembly up to .NET9.
         This means that any mod you create can be written as a .NET9 module and later merged into the patched assembly thanks to MonoMod.
 
         Here is what is now possible:

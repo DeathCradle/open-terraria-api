@@ -8,6 +8,7 @@ using Xilium.CefGlue.Common.Handlers;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Runtime.InteropServices;
 using ImGuiNET;
 
 //ChromiumWebBrowser browser;
@@ -24,12 +25,12 @@ void OnUpdate(On.Terraria.Main.orig_Update orig, Terraria.Main self, GameTime ga
     try
     {
 
-        if (CefRuntime.IsInitialized && CefRuntime.Platform != CefRuntimePlatform.Windows)
+        if (CefRuntime.IsInitialized) // && CefRuntime.Platform != CefRuntimePlatform.Windows)
         {
             CefRuntime.DoMessageLoopWork();
         }
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
         Console.WriteLine("CEF.OnUpdate", ex);
     }
@@ -86,7 +87,7 @@ void OnGUI(On.Terraria.Main.orig_OnExtGUI orig)
             }
         }
     }
-    catch(Exception ex)
+    catch (Exception ex)
     {
         Console.WriteLine("CEF.OnGUI", ex);
     }
@@ -96,6 +97,7 @@ bool ready = false;
 void OnStart()
 {
     System.Console.WriteLine("Starting CefSharp");
+    //System.Diagnistics.Debug.WriteLine("Starting CefSharpx");
     ready = true;
 }
 
@@ -298,13 +300,13 @@ public class Texture2DRenderTarget : OffscreenRenderTarget
             buffer,
             _target.Width * _target.Height
         );
-        // var length = _target.Width * _target.Height;
-        // int[] imgData = new int[length];
-        // var temporaryBuffer = new int[length];
+        //var length = _target.Width * _target.Height;
+        //int[] imgData = new int[length];
+        //var temporaryBuffer = new int[length];
 
-        // Marshal.Copy(buffer, temporaryBuffer, 0, length);
+        //Marshal.Copy(buffer, temporaryBuffer, 0, length);
 
-        // _target.SetData(temporaryBuffer);
+        _target.SetData(temporaryBuffer);
     }
 
     private bool disposedValue;
@@ -391,14 +393,24 @@ public class OffscreenBrowser : IDisposable
 
         Client.LifeSpanHandler.Created += LifeSpanHandler_Created;
 
-        if (!CefRuntime.IsInitialized)
-        {
-            var cefsettings = new CefSettings()
-            {
-                WindowlessRenderingEnabled = true
-            };
-            CefLoader.Load(cefsettings);
-        }
+        //if (!CefRuntime.IsInitialized)
+        //{
+        //    var cachePath = Path.Combine(Environment.CurrentDirectory, "cef-cache");
+        //    if (!Directory.Exists(cachePath))
+        //        Directory.CreateDirectory(cachePath);
+        //    var cefsettings = new CefSettings()
+        //    {
+        //        WindowlessRenderingEnabled = true,
+        //        LogSeverity = CefLogSeverity.Verbose,
+        //        LogFile = "cef_debug.log",
+        //        RootCachePath = cachePath,
+        //        MultiThreadedMessageLoop = true,
+        //        SingleProcess = false,
+        //    };
+        //    CefLoader.Load(cefsettings);
+        //}
+
+        CefLoader.Load();
 
         //Browser = CefBrowserHost.CreateBrowserSync(wi, client, bsettings, "https://google.com.au/");
         CefBrowserHost.CreateBrowser(wi, Client, bsettings, url);
@@ -571,6 +583,15 @@ public static class CefLoader
 
         settings.BrowserSubprocessPath = DiscoverSubProcess();
         settings.UncaughtExceptionStackSize = 10;
+
+        settings.WindowlessRenderingEnabled = true;
+        settings.LogSeverity = CefLogSeverity.Verbose;
+        settings.LogFile = "cef_debug.log";
+
+        var cachePath = Path.Combine(Environment.CurrentDirectory, "cef-cache");
+        if (!Directory.Exists(cachePath))
+            Directory.CreateDirectory(cachePath);
+        settings.RootCachePath = cachePath;
 
         switch (CefRuntime.Platform)
         {
