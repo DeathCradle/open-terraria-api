@@ -30,35 +30,38 @@ using System.Linq;
 /// @doc Creates Hooks.NPC.BossBag. Allows plugins to customize bosses loot as well as distributing it.
 /// </summary>
 
-[Modification(ModType.PreMerge, "Hooking NPC Boss Bag")]
-[MonoMod.MonoModIgnore]
-void HookNpcBossBag(ModFwModder modder)
+[MonoModIgnore]
+partial class NpcBossBag
 {
-    var csr = modder.GetILCursor(() => Terraria.GameContent.ItemDropRules.CommonCode.DropItemLocalPerClientAndSetNPCMoneyTo0(default, default, default, true));
-    csr.GotoNext(MoveType.After,
-                 i => i.OpCode == OpCodes.Ldsfld &&
-                      i.Operand is FieldReference fieldReference &&
-                      fieldReference.Name == "netMode" &&
-                      fieldReference.DeclaringType.FullName == "Terraria.Main",
-                 i => i.OpCode == OpCodes.Ldc_I4_2,
-                 i => i.OpCode == OpCodes.Bne_Un
-                );
+    [Modification(ModType.PreMerge, "Hooking NPC Boss Bag")]
+    static void HookNpcBossBag(ModFwModder modder)
+    {
+        var csr = modder.GetILCursor(() => Terraria.GameContent.ItemDropRules.CommonCode.DropItemLocalPerClientAndSetNPCMoneyTo0(default, default, default, true));
+        csr.GotoNext(MoveType.After,
+                     i => i.OpCode == OpCodes.Ldsfld &&
+                          i.Operand is FieldReference fieldReference &&
+                          fieldReference.Name == "netMode" &&
+                          fieldReference.DeclaringType.FullName == "Terraria.Main",
+                     i => i.OpCode == OpCodes.Ldc_I4_2,
+                     i => i.OpCode == OpCodes.Bne_Un
+                    );
 
-    csr.Emit(OpCodes.Ldarg_0);
-    csr.Emit(OpCodes.Ldarg_1);
-    csr.Emit(OpCodes.Ldarg_2);
-    csr.Emit(OpCodes.Ldarg_3);
-    csr.EmitDelegate(OTAPI.Hooks.NPC.InvokeBossBag);
-    csr.Emit(OpCodes.Nop);
-    csr.Emit(OpCodes.Nop);
+        csr.Emit(OpCodes.Ldarg_0);
+        csr.Emit(OpCodes.Ldarg_1);
+        csr.Emit(OpCodes.Ldarg_2);
+        csr.Emit(OpCodes.Ldarg_3);
+        csr.EmitDelegate(OTAPI.Hooks.NPC.InvokeBossBag);
+        csr.Emit(OpCodes.Nop);
+        csr.Emit(OpCodes.Nop);
 
-    csr.Previous.Previous.OpCode = OpCodes.Brtrue;
-    csr.Previous.Previous.Operand = csr.Next;
+        csr.Previous.Previous.OpCode = OpCodes.Brtrue;
+        csr.Previous.Previous.Operand = csr.Next;
 
-    var targetBranch = csr.Method.Body.Instructions.Reverse().Where(x => x.OpCode == OpCodes.Ldarg_0).First();
+        var targetBranch = csr.Method.Body.Instructions.Reverse().Where(x => x.OpCode == OpCodes.Ldarg_0).First();
 
-    csr.Previous.OpCode = OpCodes.Br;
-    csr.Previous.Operand = targetBranch;
+        csr.Previous.OpCode = OpCodes.Br;
+        csr.Previous.Operand = targetBranch;
+    }
 }
 
 namespace OTAPI
