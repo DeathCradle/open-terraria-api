@@ -23,6 +23,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace OTAPI.Patcher;
 
@@ -59,7 +60,7 @@ public static partial class Common
         return null;
     }
 
-    public static string DownloadZip(string url)
+    public static async Task<string> DownloadZipAsync(string url)
     {
         Console.WriteLine($"Downloading {url}");
         var uri = new Uri(url);
@@ -71,7 +72,7 @@ public static partial class Common
             if (!File.Exists(savePath))
             {
                 using var client = new HttpClient();
-                var data = client.GetByteArrayAsync(url).Result;
+                var data = await client.GetByteArrayAsync(url);
                 File.WriteAllBytes(savePath, data);
             }
 

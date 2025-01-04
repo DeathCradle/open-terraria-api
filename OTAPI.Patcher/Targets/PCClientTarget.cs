@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Threading.Tasks;
 using static ModFramework.ModContext;
 
 namespace OTAPI.Patcher.Targets;
@@ -158,7 +159,7 @@ public class PCClientTarget : IClientPatchTarget
         }
     }
 
-    public void Patch()
+    public Task PatchAsync()
     {
         Console.WriteLine($"Open Terraria API v{Common.GetVersion()}");
 
@@ -316,6 +317,7 @@ public class PCClientTarget : IClientPatchTarget
         InstallModules();
 
         SetStatus("Patching has completed.");
+        return Task.CompletedTask;
     }
 
     void CompileModules(string otapiexe)
