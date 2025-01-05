@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using System.Threading.Tasks;
 using static ModFramework.ModContext;
 
 namespace OTAPI.Patcher.Targets;
@@ -38,10 +39,10 @@ public class PCServerTarget : IServerPatchTarget
         return Path.Combine(ModContext.BaseDirectory, Path.GetDirectoryName(fileinput));
     }
 
-    public virtual string DownloadServer()
+    public virtual async Task<string> DownloadServerAsync()
     {
         var zipUrl = this.GetZipUrl();
-        var zipPath = Common.DownloadZip(zipUrl);
+        var zipPath = await Common.DownloadZipAsync(zipUrl);
         var extracted = Common.ExtractZip(zipPath);
 
         return FileResolver.DetermineInputAssembly(extracted);
@@ -77,7 +78,7 @@ public class PCServerTarget : IServerPatchTarget
         ModContext.PluginLoader.AddFromFolder(Path.Combine(ModContext.BaseDirectory, "modifications"));
     }
 
-    public void Patch()
+    public async Task PatchAsync()
     {
         Console.WriteLine($"Open Terraria API v{Common.GetVersion()}");
 
@@ -86,7 +87,7 @@ public class PCServerTarget : IServerPatchTarget
         {
             Common.AddMarkdownFormatter();
 
-            var vanillaDllPath = DownloadServer();
+            var vanillaDllPath = await DownloadServerAsync();
             var vanillaName = Path.GetFileNameWithoutExtension(vanillaDllPath);
 
             Console.WriteLine("[OTAPI] Extracting embedded binaries and packing into one binary...");
@@ -210,12 +211,15 @@ public class PCServerTarget : IServerPatchTarget
                             mm.Module.GetType("Terraria.NPC").CreateHooks(mm);
                             mm.Module.GetType("Terraria.WorldGen").CreateHooks(mm);
                             mm.Module.GetType("Terraria.Chat.ChatHelper").CreateHooks(mm);
+                            mm.Module.GetType("Terraria.GameContent.ItemDropRules.CommonCode").CreateHooks(mm);
                             mm.Module.GetType("Terraria.IO.WorldFile").CreateHooks(mm);
                             mm.Module.GetType("Terraria.Net.NetManager").CreateHooks(mm);
                             mm.Module.GetType("Terraria.Projectile").CreateHooks(mm);
                             mm.Module.GetType("Terraria.RemoteClient").CreateHooks(mm);
                             mm.Module.GetType("Terraria.Liquid").CreateHooks(mm);
                             mm.Module.GetType("Terraria.Program").CreateHooks(mm);
+                            mm.Module.GetType("Terraria.Wiring").CreateHooks(mm);
+                            mm.Module.GetType("Terraria.GameContent.PressurePlateHelper").CreateHooks(mm);
                             Console.WriteLine("Done");
                         }
                         else if (modType == ModType.Write)

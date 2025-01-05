@@ -17,14 +17,16 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+using System.Threading.Tasks;
+
 namespace OTAPI.Patcher;
 
 [MonoMod.MonoModIgnore]
 static class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         var target = Targets.PatchTargets.DeterminePatchTarget();
-        target.Patch();
+        await target.PatchAsync();
     }
 }

@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using static ModFramework.ModContext;
 
 namespace OTAPI.Patcher.Targets;
@@ -34,7 +35,7 @@ public interface IPatchTarget
 {
     string DisplayText { get; }
     string InstallDestination { get; }
-    void Patch();
+    Task PatchAsync();
 }
 
 [MonoMod.MonoModIgnore]
