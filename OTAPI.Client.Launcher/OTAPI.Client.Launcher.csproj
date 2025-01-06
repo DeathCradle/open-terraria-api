@@ -52,7 +52,7 @@
 		</ProjectReference>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="ImGui.NET" Version="1.91.0.1" GeneratePathProperty="true" />
+		<PackageReference Include="ImGui.NET" Version="1.91.6.1" GeneratePathProperty="true" />
 		<PackageReference Include="ModFramework.Modules.ClearScript" Version="1.1.13" GeneratePathProperty="true" />
 		<PackageReference Include="ModFramework.Modules.CSharp" Version="1.1.13" GeneratePathProperty="true" />
 		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.13" GeneratePathProperty="true" />
