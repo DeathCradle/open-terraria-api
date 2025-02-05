@@ -28,7 +28,7 @@
 		<PackageReference Include="MonoMod" Version="22.7.31.1">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</PackageReference>
-		<PackageReference Include="MonoMod.RuntimeDetour" Version="25.2.2">
+		<PackageReference Include="MonoMod.RuntimeDetour" Version="25.2.3">
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</PackageReference>
 	</ItemGroup>
