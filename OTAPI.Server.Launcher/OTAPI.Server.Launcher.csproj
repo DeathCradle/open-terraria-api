@@ -20,7 +20,7 @@
 		<PackageReference Include="ModFramework.Modules.Lua" Version="1.1.13" />
 		<PackageReference Include="Steamworks.NET" Version="2024.8.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.2" />
 		<PackageReference Include="System.Drawing.Common" Version="9.0.0" />
 		<PackageReference Include="System.IO.Packaging" Version="9.0.0" />
 		<PackageReference Include="System.Security.Permissions" Version="9.0.0" />
